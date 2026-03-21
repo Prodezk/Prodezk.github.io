@@ -1,0 +1,3264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PAYROLL SET UP — Automation Implementation Guide | Prodezk Team</title>
+    <style>
+        :root {
+            --bg-primary: #ffffff;
+            --bg-secondary: #f8fafc;
+            --bg-tertiary: #f1f5f9;
+            --text-primary: #1e293b;
+            --text-secondary: #475569;
+            --text-muted: #94a3b8;
+            --border-color: #e2e8f0;
+            --accent-primary: #3b82f6;
+            --accent-secondary: #8b5cf6;
+            --accent-success: #10b981;
+            --accent-warning: #f59e0b;
+            --accent-danger: #ef4444;
+            --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1);
+            --radius-sm: 6px;
+            --radius-md: 10px;
+            --radius-lg: 16px;
+        }
+
+        [data-theme="dark"] {
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --bg-tertiary: #334155;
+            --text-primary: #f1f5f9;
+            --text-secondary: #cbd5e1;
+            --text-muted: #64748b;
+            --border-color: #334155;
+            --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
+            --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.4);
+            --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.5);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.7;
+            transition: background 0.3s, color 0.3s;
+        }
+
+        /* Header */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 70px;
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            z-index: 1000;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .header-title {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header-title h1 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .header-title span {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .theme-toggle {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 8px 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-primary);
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+
+        .theme-toggle:hover {
+            background: var(--accent-primary);
+            color: white;
+            border-color: var(--accent-primary);
+        }
+
+        .progress-badge {
+            background: var(--accent-success);
+            color: white;
+            padding: 8px 16px;
+            border-radius: var(--radius-md);
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            position: fixed;
+            top: 70px;
+            left: 0;
+            width: 280px;
+            height: calc(100vh - 70px);
+            background: var(--bg-secondary);
+            border-right: 1px solid var(--border-color);
+            padding: 24px 0;
+            overflow-y: auto;
+            z-index: 900;
+        }
+
+        .sidebar-section {
+            padding: 0 16px;
+            margin-bottom: 24px;
+        }
+
+        .sidebar-section-title {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+            padding-left: 12px;
+        }
+
+        .nav-item {
+            display: block;
+            padding: 12px 16px;
+            border-radius: var(--radius-sm);
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.95rem;
+            transition: all 0.2s;
+            margin-bottom: 4px;
+        }
+
+        .nav-item:hover {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+
+        .nav-item.active {
+            background: var(--accent-primary);
+            color: white;
+        }
+
+        .nav-item-badge {
+            background: var(--accent-success);
+            color: white;
+            font-size: 0.7rem;
+            padding: 2px 8px;
+            border-radius: 10px;
+            margin-left: 8px;
+        }
+
+        /* Main Content */
+        .main {
+            margin-left: 280px;
+            margin-top: 70px;
+            padding: 40px;
+            max-width: 1000px;
+        }
+
+        .section {
+            margin-bottom: 80px;
+            scroll-margin-top: 100px;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+
+        .section-number {
+            background: var(--accent-primary);
+            color: white;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.1rem;
+            flex-shrink: 0;
+        }
+
+        .section-title {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .section-subtitle {
+            font-size: 1rem;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        /* Content Cards */
+        .card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 28px;
+            margin-bottom: 24px;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .card-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card-icon {
+            font-size: 1.3rem;
+        }
+
+        p {
+            margin-bottom: 16px;
+            color: var(--text-secondary);
+        }
+
+        /* Flow Diagram */
+        .flow-container {
+            background: var(--bg-tertiary);
+            border-radius: var(--radius-lg);
+            padding: 40px;
+            overflow-x: auto;
+        }
+
+        .flow-diagram {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0;
+            min-width: 600px;
+        }
+
+        .flow-node {
+            background: var(--bg-primary);
+            border: 2px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 16px 24px;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+            text-align: center;
+            min-width: 280px;
+        }
+
+        .flow-node:hover {
+            border-color: var(--accent-primary);
+            box-shadow: var(--shadow-md);
+            transform: translateY(-2px);
+        }
+
+        .flow-node.trigger {
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            color: white;
+            border: none;
+        }
+
+        .flow-node.action {
+            border-left: 4px solid var(--accent-secondary);
+        }
+
+        .flow-node.final {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            border: none;
+        }
+
+        .flow-node-title {
+            font-weight: 600;
+            font-size: 1rem;
+            margin-bottom: 4px;
+        }
+
+        .flow-node-subtitle {
+            font-size: 0.85rem;
+            opacity: 0.85;
+        }
+
+        .flow-arrow {
+            height: 40px;
+            width: 2px;
+            background: var(--border-color);
+            position: relative;
+        }
+
+        .flow-arrow::after {
+            content: '▼';
+            position: absolute;
+            bottom: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: var(--border-color);
+            font-size: 12px;
+        }
+
+        .flow-branch {
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+            flex-wrap: wrap;
+            margin: 20px 0;
+        }
+
+        .flow-branch .flow-node {
+            min-width: 200px;
+            flex: 1;
+            max-width: 200px;
+        }
+
+        .flow-connector {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 16px;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .flow-connector-line {
+            width: 40px;
+            height: 2px;
+            background: var(--border-color);
+        }
+
+        /* Popover */
+        .popover {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            margin-top: 16px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 20px;
+            width: 320px;
+            box-shadow: var(--shadow-lg);
+            z-index: 100;
+            text-align: left;
+        }
+
+        .popover::before {
+            content: '';
+            position: absolute;
+            top: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-left: 8px solid transparent;
+            border-right: 8px solid transparent;
+            border-bottom: 8px solid var(--border-color);
+        }
+
+        .flow-node.active .popover {
+            display: block;
+        }
+
+        .popover-title {
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 12px;
+            font-size: 1rem;
+        }
+
+        .popover-item {
+            margin-bottom: 10px;
+        }
+
+        .popover-label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            margin-bottom: 2px;
+        }
+
+        .popover-value {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        /* Comparison Table */
+        .comparison {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            margin: 24px 0;
+        }
+
+        .comparison-col {
+            background: var(--bg-secondary);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            border: 1px solid var(--border-color);
+        }
+
+        .comparison-col.before {
+            border-top: 4px solid var(--accent-danger);
+        }
+
+        .comparison-col.after {
+            border-top: 4px solid var(--accent-success);
+        }
+
+        .comparison-title {
+            font-weight: 700;
+            font-size: 1.1rem;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .comparison-list {
+            list-style: none;
+        }
+
+        .comparison-list li {
+            padding: 10px 0;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            color: var(--text-secondary);
+        }
+
+        .comparison-list li:last-child {
+            border-bottom: none;
+        }
+
+        .comparison-list .icon {
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        /* Data Table */
+        .data-table-container {
+            overflow-x: auto;
+            margin: 24px 0;
+        }
+
+        .table-filter {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .filter-btn {
+            padding: 8px 16px;
+            border: 1px solid var(--border-color);
+            background: var(--bg-secondary);
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+
+        .filter-btn:hover, .filter-btn.active {
+            background: var(--accent-primary);
+            color: white;
+            border-color: var(--accent-primary);
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+        .data-table th {
+            background: var(--bg-tertiary);
+            padding: 14px 16px;
+            text-align: left;
+            font-weight: 600;
+            color: var(--text-primary);
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .data-table td {
+            padding: 14px 16px;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-secondary);
+        }
+
+        .data-table tr:hover td {
+            background: var(--bg-tertiary);
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .badge-required {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+
+        [data-theme="dark"] .badge-required {
+            background: #7f1d1d;
+            color: #fecaca;
+        }
+
+        .badge-optional {
+            background: #dbeafe;
+            color: #2563eb;
+        }
+
+        [data-theme="dark"] .badge-optional {
+            background: #1e3a8a;
+            color: #bfdbfe;
+        }
+
+        /* Step Tutorial */
+        .step {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        .step-header {
+            background: var(--bg-tertiary);
+            padding: 16px 24px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .step-number {
+            background: var(--accent-primary);
+            color: white;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.9rem;
+            flex-shrink: 0;
+        }
+
+        .step-title {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .step-body {
+            padding: 24px;
+        }
+
+        /* Screenshot Mockup Styles */
+        .mockup-container {
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            margin: 20px 0;
+            box-shadow: var(--shadow-md);
+            border-top: 3px solid #0069d9;
+            position: relative;
+            max-height: 320px;
+            overflow-y: auto;
+            background: #fff;
+        }
+
+        [data-theme="dark"] .mockup-container {
+            background: #1a1f2e;
+        }
+
+        .mockup-badge {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: #f97316;
+            color: white;
+            font-size: 0.7rem;
+            font-weight: 600;
+            padding: 4px 10px;
+            border-radius: 12px;
+            z-index: 10;
+        }
+
+        .mockup-browser-bar {
+            background: #2d3748;
+            padding: 8px 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .mockup-dots {
+            display: flex;
+            gap: 6px;
+        }
+
+        .mockup-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+
+        .mockup-dot.red { background: #ef4444; }
+        .mockup-dot.yellow { background: #f59e0b; }
+        .mockup-dot.green { background: #10b981; }
+
+        .mockup-app-name {
+            color: #e2e8f0;
+            font-size: 0.8rem;
+            font-weight: 500;
+            margin-left: 8px;
+        }
+
+        .mockup-content {
+            display: flex;
+            min-height: 200px;
+        }
+
+        .mockup-sidebar {
+            width: 140px;
+            background: #f8fafc;
+            border-right: 1px solid #e2e8f0;
+            padding: 12px 8px;
+            flex-shrink: 0;
+        }
+
+        [data-theme="dark"] .mockup-sidebar {
+            background: #1e293b;
+            border-color: #334155;
+        }
+
+        .mockup-sidebar-item {
+            padding: 8px 10px;
+            font-size: 0.75rem;
+            color: #64748b;
+            border-radius: 4px;
+            margin-bottom: 4px;
+            cursor: default;
+        }
+
+        .mockup-sidebar-item:hover {
+            background: #e2e8f0;
+        }
+
+        [data-theme="dark"] .mockup-sidebar-item:hover {
+            background: #334155;
+        }
+
+        .mockup-main {
+            flex: 1;
+            padding: 16px;
+            background: #fff;
+        }
+
+        [data-theme="dark"] .mockup-main {
+            background: #0f172a;
+        }
+
+        .mockup-form-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 16px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        [data-theme="dark"] .mockup-form-title {
+            color: #f1f5f9;
+            border-color: #334155;
+        }
+
+        .mockup-field {
+            margin-bottom: 12px;
+        }
+
+        .mockup-field-label {
+            font-size: 0.7rem;
+            color: #64748b;
+            margin-bottom: 4px;
+            font-weight: 500;
+        }
+
+        .mockup-field-input {
+            width: 100%;
+            padding: 8px 10px;
+            border: 1px solid #e2e8f0;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            background: #f8fafc;
+            color: #475569;
+        }
+
+        [data-theme="dark"] .mockup-field-input {
+            background: #1e293b;
+            border-color: #334155;
+            color: #cbd5e1;
+        }
+
+        .mockup-add-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 10px 16px;
+            background: #3b82f6;
+            color: white;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            margin-top: 12px;
+        }
+
+        .mockup-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.8rem;
+        }
+
+        .mockup-table th {
+            text-align: left;
+            padding: 10px 12px;
+            background: #f1f5f9;
+            font-weight: 600;
+            color: #475569;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        [data-theme="dark"] .mockup-table th {
+            background: #1e293b;
+            color: #cbd5e1;
+            border-color: #334155;
+        }
+
+        .mockup-table td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #e2e8f0;
+            color: #64748b;
+        }
+
+        [data-theme="dark"] .mockup-table td {
+            border-color: #334155;
+            color: #94a3b8;
+        }
+
+        .mockup-map-btn {
+            padding: 4px 10px;
+            background: #10b981;
+            color: white;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: 500;
+        }
+
+        .mockup-flow-canvas {
+            background: #f8fafc;
+            min-height: 200px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0;
+        }
+
+        [data-theme="dark"] .mockup-flow-canvas {
+            background: #1e293b;
+        }
+
+        .mockup-flow-block {
+            background: white;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 12px 20px;
+            min-width: 180px;
+            text-align: center;
+            position: relative;
+        }
+
+        [data-theme="dark"] .mockup-flow-block {
+            background: #0f172a;
+            border-color: #334155;
+        }
+
+        .mockup-flow-block.trigger {
+            border-left: 4px solid #3b82f6;
+        }
+
+        .mockup-flow-block.action {
+            border-left: 4px solid #8b5cf6;
+        }
+
+        .mockup-flow-block-title {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #1e293b;
+        }
+
+        [data-theme="dark"] .mockup-flow-block-title {
+            color: #f1f5f9;
+        }
+
+        .mockup-flow-block-sub {
+            font-size: 0.7rem;
+            color: #64748b;
+            margin-top: 2px;
+        }
+
+        .mockup-flow-arrow {
+            width: 2px;
+            height: 24px;
+            background: #cbd5e1;
+            position: relative;
+        }
+
+        .mockup-flow-arrow::after {
+            content: '▼';
+            position: absolute;
+            bottom: -6px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #cbd5e1;
+            font-size: 8px;
+        }
+
+        .mockup-config-panel {
+            background: #f8fafc;
+            border-radius: 6px;
+            padding: 16px;
+        }
+
+        [data-theme="dark"] .mockup-config-panel {
+            background: #1e293b;
+        }
+
+        .mockup-config-row {
+            display: flex;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid #e2e8f0;
+            font-size: 0.8rem;
+        }
+
+        [data-theme="dark"] .mockup-config-row {
+            border-color: #334155;
+        }
+
+        .mockup-config-row:last-child {
+            border-bottom: none;
+        }
+
+        .mockup-config-label {
+            width: 100px;
+            color: #64748b;
+            flex-shrink: 0;
+            font-weight: 500;
+        }
+
+        .mockup-config-value {
+            color: #1e293b;
+            flex: 1;
+        }
+
+        [data-theme="dark"] .mockup-config-value {
+            color: #f1f5f9;
+        }
+
+        .mockup-merge-token {
+            display: inline-block;
+            background: #dbeafe;
+            color: #1d4ed8;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-family: 'SF Mono', Consolas, Monaco, monospace;
+            font-size: 0.75rem;
+        }
+
+        [data-theme="dark"] .mockup-merge-token {
+            background: #1e3a8a;
+            color: #93c5fd;
+        }
+
+        .mockup-rule-container {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 16px;
+            background: #f8fafc;
+            border-radius: 6px;
+        }
+
+        [data-theme="dark"] .mockup-rule-container {
+            background: #1e293b;
+        }
+
+        .mockup-rule-box {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            padding: 12px 16px;
+            flex: 1;
+        }
+
+        [data-theme="dark"] .mockup-rule-box {
+            background: #0f172a;
+            border-color: #334155;
+        }
+
+        .mockup-rule-label {
+            font-size: 0.65rem;
+            color: #64748b;
+            text-transform: uppercase;
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+
+        .mockup-rule-content {
+            font-size: 0.8rem;
+            color: #1e293b;
+        }
+
+        [data-theme="dark"] .mockup-rule-content {
+            color: #f1f5f9;
+        }
+
+        .mockup-rule-arrow {
+            color: #3b82f6;
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        /* Zoho Ecosystem Cards */
+        .ecosystem-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 16px;
+            margin: 24px 0;
+        }
+
+        .ecosystem-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            transition: all 0.2s;
+        }
+
+        .ecosystem-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+            border-color: var(--accent-primary);
+        }
+
+        .ecosystem-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-bottom: 12px;
+        }
+
+        .ecosystem-card-title {
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: var(--text-primary);
+            margin-bottom: 6px;
+        }
+
+        .ecosystem-card-desc {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            line-height: 1.4;
+        }
+
+        .example-callout {
+            background: linear-gradient(135deg, #dbeafe, #e0e7ff);
+            border: 1px solid #93c5fd;
+            border-radius: var(--radius-md);
+            padding: 16px 20px;
+            margin-top: 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        [data-theme="dark"] .example-callout {
+            background: linear-gradient(135deg, #1e3a8a, #312e81);
+            border-color: #3b82f6;
+        }
+
+        .example-callout-icon {
+            font-size: 1.5rem;
+            flex-shrink: 0;
+        }
+
+        .example-callout-text {
+            font-size: 0.9rem;
+            color: #1e40af;
+        }
+
+        [data-theme="dark"] .example-callout-text {
+            color: #bfdbfe;
+        }
+
+        /* Code Block */
+        .code-block {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 16px 20px;
+            border-radius: var(--radius-md);
+            font-family: 'SF Mono', Consolas, Monaco, monospace;
+            font-size: 0.9rem;
+            overflow-x: auto;
+            margin: 16px 0;
+        }
+
+        .code-inline {
+            background: var(--bg-tertiary);
+            color: var(--accent-secondary);
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-family: 'SF Mono', Consolas, Monaco, monospace;
+            font-size: 0.85rem;
+        }
+
+        /* Menu Path */
+        .menu-path {
+            display: inline-flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 6px;
+            background: var(--bg-tertiary);
+            padding: 8px 14px;
+            border-radius: var(--radius-sm);
+            margin: 8px 0;
+        }
+
+        .menu-path span {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .menu-path .separator {
+            color: var(--text-muted);
+        }
+
+        /* Checklist */
+        .checklist {
+            list-style: none;
+        }
+
+        .checklist-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 14px;
+            padding: 14px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .checklist-item:last-child {
+            border-bottom: none;
+        }
+
+        .checklist-checkbox {
+            width: 22px;
+            height: 22px;
+            border: 2px solid var(--border-color);
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            transition: all 0.2s;
+            background: var(--bg-primary);
+            margin-top: 2px;
+        }
+
+        .checklist-checkbox:hover {
+            border-color: var(--accent-primary);
+        }
+
+        .checklist-checkbox.checked {
+            background: var(--accent-success);
+            border-color: var(--accent-success);
+        }
+
+        .checklist-checkbox.checked::after {
+            content: '✓';
+            color: white;
+            font-weight: 700;
+            font-size: 14px;
+        }
+
+        .checklist-item.completed .checklist-text {
+            text-decoration: line-through;
+            color: var(--text-muted);
+        }
+
+        .checklist-text {
+            color: var(--text-secondary);
+            flex: 1;
+        }
+
+        .checklist-category {
+            font-weight: 600;
+            color: var(--text-primary);
+            padding: 20px 0 10px;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Warning/Info Boxes */
+        .callout {
+            padding: 20px 24px;
+            border-radius: var(--radius-md);
+            margin: 20px 0;
+            display: flex;
+            gap: 14px;
+        }
+
+        .callout-icon {
+            font-size: 1.3rem;
+            flex-shrink: 0;
+        }
+
+        .callout-content {
+            flex: 1;
+        }
+
+        .callout-title {
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+
+        .callout.warning {
+            background: #fef3c7;
+            border: 1px solid #fcd34d;
+        }
+
+        .callout.warning .callout-title { color: #92400e; }
+        .callout.warning .callout-content { color: #a16207; }
+
+        [data-theme="dark"] .callout.warning {
+            background: #78350f;
+            border-color: #92400e;
+        }
+        [data-theme="dark"] .callout.warning .callout-title { color: #fef3c7; }
+        [data-theme="dark"] .callout.warning .callout-content { color: #fde68a; }
+
+        .callout.info {
+            background: #dbeafe;
+            border: 1px solid #93c5fd;
+        }
+
+        .callout.info .callout-title { color: #1e40af; }
+        .callout.info .callout-content { color: #1d4ed8; }
+
+        [data-theme="dark"] .callout.info {
+            background: #1e3a8a;
+            border-color: #1d4ed8;
+        }
+        [data-theme="dark"] .callout.info .callout-title { color: #dbeafe; }
+        [data-theme="dark"] .callout.info .callout-content { color: #bfdbfe; }
+
+        .callout.success {
+            background: #d1fae5;
+            border: 1px solid #6ee7b7;
+        }
+
+        .callout.success .callout-title { color: #065f46; }
+        .callout.success .callout-content { color: #047857; }
+
+        [data-theme="dark"] .callout.success {
+            background: #064e3b;
+            border-color: #047857;
+        }
+        [data-theme="dark"] .callout.success .callout-title { color: #d1fae5; }
+        [data-theme="dark"] .callout.success .callout-content { color: #a7f3d0; }
+
+        /* Email Template */
+        .email-preview {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            margin: 20px 0;
+        }
+
+        .email-header {
+            background: #f8fafc;
+            padding: 16px 20px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .email-field {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+        }
+
+        .email-field:last-child {
+            margin-bottom: 0;
+        }
+
+        .email-label {
+            color: #64748b;
+            width: 60px;
+            flex-shrink: 0;
+        }
+
+        .email-value {
+            color: #1e293b;
+        }
+
+        .email-body {
+            padding: 24px;
+            color: #1e293b;
+            font-size: 0.95rem;
+            line-height: 1.8;
+        }
+
+        .merge-field {
+            background: #fef3c7;
+            color: #92400e;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'SF Mono', Consolas, Monaco, monospace;
+            font-size: 0.85rem;
+        }
+
+        /* Responsive */
+        /* Mobile hamburger button */
+        .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            padding: 8px 10px;
+            cursor: pointer;
+            color: var(--text-primary);
+            font-size: 1.2rem;
+            line-height: 1;
+        }
+
+        /* Mobile nav overlay */
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.45);
+            z-index: 890;
+        }
+        .sidebar-overlay.active { display: block; }
+
+        @media (max-width: 1024px) {
+            .mobile-menu-btn { display: flex; align-items: center; }
+
+            .sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.25s ease;
+                z-index: 950;
+                width: 260px;
+            }
+            .sidebar.open { transform: translateX(0); }
+
+            .main {
+                margin-left: 0;
+                padding: 24px;
+            }
+
+            .comparison {
+                grid-template-columns: 1fr;
+            }
+
+            .flow-branch {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .flow-branch .flow-node {
+                max-width: 100%;
+                width: 100%;
+            }
+
+            .ecosystem-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 600px) {
+            .header {
+                padding: 0 12px;
+                height: 56px;
+            }
+
+            .header-title h1 {
+                font-size: 0.95rem;
+            }
+
+            .header-title span {
+                display: none;
+            }
+
+            .header-actions {
+                gap: 8px;
+            }
+
+            .progress-badge {
+                font-size: 0.75rem;
+                padding: 6px 10px;
+            }
+
+            .theme-toggle span:not(:first-child) {
+                display: none;
+            }
+
+            .main {
+                margin-top: 56px;
+                padding: 12px;
+            }
+
+            .section {
+                margin-bottom: 48px;
+            }
+
+            .section-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+            }
+
+            .flow-container {
+                padding: 16px 10px;
+                overflow-x: auto;
+            }
+
+            .step {
+                padding: 16px;
+            }
+
+            .step-header {
+                flex-wrap: wrap;
+                gap: 8px;
+            }
+
+            .card {
+                padding: 16px;
+            }
+
+            .data-table th,
+            .data-table td {
+                font-size: 0.8rem;
+                padding: 8px 10px;
+            }
+
+            .comparison-col {
+                padding: 16px;
+            }
+
+            h2.section-title {
+                font-size: 1.2rem;
+            }
+
+            .ecosystem-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .mockup-sidebar {
+                display: none;
+            }
+        }
+
+        /* Print Styles */
+        @media print {
+            .sidebar, .header, .theme-toggle {
+                display: none !important;
+            }
+            
+            .main {
+                margin: 0;
+                padding: 20px;
+                max-width: 100%;
+            }
+            
+            .section {
+                page-break-inside: avoid;
+            }
+            
+            .card, .step {
+                break-inside: avoid;
+            }
+            
+            .flow-node {
+                border: 1px solid #333 !important;
+            }
+            
+            .popover {
+                display: none !important;
+            }
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .section {
+            animation: fadeIn 0.4s ease-out;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .flow-node:hover {
+            animation: pulse 0.3s ease-in-out;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-title">
+            <h1>PAYROLL SET UP — Automation Implementation Guide</h1>
+            <span>Example for Prodezk Team | Created for Camilo Florez</span>
+        </div>
+        <div class="header-actions">
+            <button class="mobile-menu-btn" onclick="toggleSidebar()" aria-label="Menu">☰</button>
+            <div class="progress-badge" id="progressBadge">Progress: 0 / 21</div>
+            <button class="theme-toggle" onclick="toggleTheme()">
+                <span id="themeIcon">🌙</span>
+                <span id="themeText">Dark Mode</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Mobile overlay -->
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+    <!-- Sidebar -->
+    <nav class="sidebar" id="sidebar">
+        <div class="sidebar-section">
+            <div class="sidebar-section-title">Overview</div>
+            <a href="#section-a" class="nav-item">A. Zoho Ecosystem</a>
+            <a href="#section-b" class="nav-item active">B. Trigger Chain Flow</a>
+        </div>
+        <div class="sidebar-section">
+            <div class="sidebar-section-title">Implementation Steps</div>
+            <a href="#section-c1" class="nav-item">C1. What This Does</a>
+            <a href="#section-c2" class="nav-item">C2. Data Mapping</a>
+            <a href="#section-c3" class="nav-item">C3. Build the Form</a>
+            <a href="#section-c4" class="nav-item">C4. Set Up Zoho Flow</a>
+            <a href="#section-c5" class="nav-item">C5. CRM Blueprint</a>
+            <a href="#section-c6" class="nav-item">C6. Notification Templates</a>
+        </div>
+        <div class="sidebar-section">
+            <div class="sidebar-section-title">Testing & Launch</div>
+            <a href="#section-c7" class="nav-item">C7. Testing Protocol</a>
+            <a href="#section-c8" class="nav-item">C8. Go-Live Checklist</a>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main">
+        <!-- PART A: Zoho Ecosystem -->
+        <section class="section" id="section-a">
+            <div class="section-header">
+                <div class="section-number">A</div>
+                <div>
+                    <div class="section-title">Zoho Ecosystem</div>
+                    <div class="section-subtitle">The tools that power Prodezk automations</div>
+                </div>
+            </div>
+
+            <p>This guide teaches you how to build automations that connect Prodezk's Zoho apps. Here's the ecosystem you'll be working with — each app handles one piece of the puzzle.</p>
+
+            <div class="ecosystem-grid">
+                <div class="ecosystem-card">
+                    <div class="ecosystem-icon" style="background: linear-gradient(135deg, #3b82f6, #1d4ed8);">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                            <circle cx="9" cy="7" r="4"/>
+                            <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                            <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                        </svg>
+                    </div>
+                    <div class="ecosystem-card-title">Zoho CRM</div>
+                    <div class="ecosystem-card-desc">Where clients start. Tracks deals and triggers automations.</div>
+                </div>
+
+                <div class="ecosystem-card">
+                    <div class="ecosystem-icon" style="background: linear-gradient(135deg, #8b5cf6, #6d28d9);">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                            <polyline points="22,6 12,13 2,6"/>
+                        </svg>
+                    </div>
+                    <div class="ecosystem-card-title">Zoho Flow</div>
+                    <div class="ecosystem-card-desc">The glue. Connects all your apps automatically.</div>
+                </div>
+
+                <div class="ecosystem-card">
+                    <div class="ecosystem-icon" style="background: linear-gradient(135deg, #10b981, #059669);">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                            <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
+                            <line x1="8" y1="21" x2="16" y2="21"/>
+                            <line x1="12" y1="17" x2="12" y2="21"/>
+                        </svg>
+                    </div>
+                    <div class="ecosystem-card-title">Zoho Books</div>
+                    <div class="ecosystem-card-desc">Creates invoices and tracks payments.</div>
+                </div>
+
+                <div class="ecosystem-card">
+                    <div class="ecosystem-icon" style="background: linear-gradient(135deg, #f59e0b, #d97706);">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                            <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+                        </svg>
+                    </div>
+                    <div class="ecosystem-card-title">Zoho Projects</div>
+                    <div class="ecosystem-card-desc">Manages the work your team needs to do.</div>
+                </div>
+
+                <div class="ecosystem-card">
+                    <div class="ecosystem-icon" style="background: linear-gradient(135deg, #ef4444, #dc2626);">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                        </svg>
+                    </div>
+                    <div class="ecosystem-card-title">Zoho Desk</div>
+                    <div class="ecosystem-card-desc">Handles client support and SLA tracking.</div>
+                </div>
+
+                <div class="ecosystem-card">
+                    <div class="ecosystem-icon" style="background: linear-gradient(135deg, #06b6d4, #0891b2);">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                            <path d="M9 11l3 3L22 4"/>
+                            <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+                        </svg>
+                    </div>
+                    <div class="ecosystem-card-title">Zoho Forms</div>
+                    <div class="ecosystem-card-desc">Collects info from clients cleanly.</div>
+                </div>
+
+                <div class="ecosystem-card">
+                    <div class="ecosystem-icon" style="background: linear-gradient(135deg, #ec4899, #db2777);">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                            <line x1="22" y1="2" x2="11" y2="13"/>
+                            <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+                        </svg>
+                    </div>
+                    <div class="ecosystem-card-title">ZeptoMail</div>
+                    <div class="ecosystem-card-desc">Sends transactional emails reliably.</div>
+                </div>
+
+                <div class="ecosystem-card">
+                    <div class="ecosystem-icon" style="background: linear-gradient(135deg, #22c55e, #16a34a);">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                            <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
+                        </svg>
+                    </div>
+                    <div class="ecosystem-card-title">Zoho SalesIQ</div>
+                    <div class="ecosystem-card-desc">WhatsApp and live chat with clients.</div>
+                </div>
+
+                <div class="ecosystem-card">
+                    <div class="ecosystem-icon" style="background: linear-gradient(135deg, #6366f1, #4f46e5);">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                            <line x1="18" y1="20" x2="18" y2="10"/>
+                            <line x1="12" y1="20" x2="12" y2="4"/>
+                            <line x1="6" y1="20" x2="6" y2="14"/>
+                        </svg>
+                    </div>
+                    <div class="ecosystem-card-title">Zoho Analytics</div>
+                    <div class="ecosystem-card-desc">Dashboards and reports across all apps.</div>
+                </div>
+            </div>
+
+            <div class="example-callout">
+                <div class="example-callout-icon">📋</div>
+                <div class="example-callout-text">
+                    <strong>In this guide, we walk through PAYROLL SET UP as the example.</strong> Every other automation follows the same pattern — trigger in CRM, orchestrate with Flow, push to other apps.
+                </div>
+            </div>
+        </section>
+
+        <!-- PART B: Trigger Chain Flow -->
+        <section class="section" id="section-b">
+            <div class="section-header">
+                <div class="section-number">B</div>
+                <div>
+                    <div class="section-title">The Correct Trigger Chain</div>
+                    <div class="section-subtitle">Visual flow of what happens when a deal moves to "Signed"</div>
+                </div>
+            </div>
+
+            <p>Click on any step in the flow below to learn more about what it does, which Zoho app handles it, and where to configure it.</p>
+
+            <div class="flow-container">
+                <div class="flow-diagram">
+                    <!-- Trigger -->
+                    <div class="flow-node trigger" onclick="togglePopover(this)">
+                        <div class="flow-node-title">📋 CRM Deal → Stage: "Signed"</div>
+                        <div class="flow-node-subtitle">The automation trigger</div>
+                        <div class="popover">
+                            <div class="popover-title">Trigger: Deal Moves to Signed</div>
+                            <div class="popover-item">
+                                <div class="popover-label">What it does</div>
+                                <div class="popover-value">When a deal's stage changes to "Signed" in Zoho CRM, this kicks off the entire automation chain.</div>
+                            </div>
+                            <div class="popover-item">
+                                <div class="popover-label">Zoho App</div>
+                                <div class="popover-value">Zoho CRM + Zoho Flow</div>
+                            </div>
+                            <div class="popover-item">
+                                <div class="popover-label">Where to configure</div>
+                                <div class="popover-value">Zoho Flow → Create Flow → App: Zoho CRM → Trigger: Field Updated</div>
+                            </div>
+                            <div class="popover-item">
+                                <div class="popover-label">Why it matters</div>
+                                <div class="popover-value">This is the single point that starts everything. No manual intervention needed once a deal is signed.</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flow-arrow"></div>
+
+                    <div class="flow-connector">
+                        <div class="flow-connector-line"></div>
+                        <span>Zoho Flow triggers these actions simultaneously</span>
+                        <div class="flow-connector-line"></div>
+                    </div>
+
+                    <!-- Actions Branch -->
+                    <div class="flow-branch">
+                        <div class="flow-node action" onclick="togglePopover(this)">
+                            <div class="flow-node-title">📚 Books</div>
+                            <div class="flow-node-subtitle">Create Customer</div>
+                            <div class="popover">
+                                <div class="popover-title">Create Customer in Books</div>
+                                <div class="popover-item">
+                                    <div class="popover-label">What it does</div>
+                                    <div class="popover-value">Creates a customer record in Zoho Books with the client's billing info, so invoicing is ready to go.</div>
+                                </div>
+                                <div class="popover-item">
+                                    <div class="popover-label">Zoho App</div>
+                                    <div class="popover-value">Zoho Books</div>
+                                </div>
+                                <div class="popover-item">
+                                    <div class="popover-label">Where to configure</div>
+                                    <div class="popover-value">Zoho Flow → Action: Zoho Books → Create Customer</div>
+                                </div>
+                                <div class="popover-item">
+                                    <div class="popover-label">Why it matters</div>
+                                    <div class="popover-value">No more manually entering client info in Books. Reduces errors and saves 5+ minutes per client.</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="flow-node action" onclick="togglePopover(this)">
+                            <div class="flow-node-title">📁 Projects</div>
+                            <div class="flow-node-subtitle">Create Project</div>
+                            <div class="popover">
+                                <div class="popover-title">Create Project from Template</div>
+                                <div class="popover-item">
+                                    <div class="popover-label">What it does</div>
+                                    <div class="popover-value">Creates a new project in Zoho Projects using the "Payroll Setup" template, complete with all standard tasks.</div>
+                                </div>
+                                <div class="popover-item">
+                                    <div class="popover-label">Zoho App</div>
+                                    <div class="popover-value">Zoho Projects</div>
+                                </div>
+                                <div class="popover-item">
+                                    <div class="popover-label">Where to configure</div>
+                                    <div class="popover-value">Zoho Flow → Action: Zoho Projects → Create Project (select template)</div>
+                                </div>
+                                <div class="popover-item">
+                                    <div class="popover-label">Why it matters</div>
+                                    <div class="popover-value">Every payroll setup follows the same steps. Template ensures nothing is forgotten.</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="flow-node action" onclick="togglePopover(this)">
+                            <div class="flow-node-title">🎫 Desk</div>
+                            <div class="flow-node-subtitle">Create Ticket</div>
+                            <div class="popover">
+                                <div class="popover-title">Create Support Ticket</div>
+                                <div class="popover-item">
+                                    <div class="popover-label">What it does</div>
+                                    <div class="popover-value">Creates a ticket in Zoho Desk assigned to the onboarding team, so they know a new client needs setup.</div>
+                                </div>
+                                <div class="popover-item">
+                                    <div class="popover-label">Zoho App</div>
+                                    <div class="popover-value">Zoho Desk</div>
+                                </div>
+                                <div class="popover-item">
+                                    <div class="popover-label">Where to configure</div>
+                                    <div class="popover-value">Zoho Flow → Action: Zoho Desk → Create Ticket</div>
+                                </div>
+                                <div class="popover-item">
+                                    <div class="popover-label">Why it matters</div>
+                                    <div class="popover-value">Tracks client communication in one place. Team can see all interactions and updates.</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="flow-node action" onclick="togglePopover(this)">
+                            <div class="flow-node-title">✉️ ZeptoMail</div>
+                            <div class="flow-node-subtitle">Welcome Email</div>
+                            <div class="popover">
+                                <div class="popover-title">Send Welcome Email</div>
+                                <div class="popover-item">
+                                    <div class="popover-label">What it does</div>
+                                    <div class="popover-value">Sends a professional welcome email to the client with next steps and what to expect.</div>
+                                </div>
+                                <div class="popover-item">
+                                    <div class="popover-label">Zoho App</div>
+                                    <div class="popover-value">ZeptoMail (Zoho's transactional email)</div>
+                                </div>
+                                <div class="popover-item">
+                                    <div class="popover-label">Where to configure</div>
+                                    <div class="popover-value">Zoho Flow → Action: ZeptoMail → Send Email (use template)</div>
+                                </div>
+                                <div class="popover-item">
+                                    <div class="popover-label">Why it matters</div>
+                                    <div class="popover-value">Client feels taken care of immediately. Professional first impression without manual effort.</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="flow-node action" onclick="togglePopover(this)">
+                            <div class="flow-node-title">💬 SalesIQ</div>
+                            <div class="flow-node-subtitle">WhatsApp Message</div>
+                            <div class="popover">
+                                <div class="popover-title">Send WhatsApp Notification</div>
+                                <div class="popover-item">
+                                    <div class="popover-label">What it does</div>
+                                    <div class="popover-value">Sends a WhatsApp message to the client confirming their signup and providing a quick contact option.</div>
+                                </div>
+                                <div class="popover-item">
+                                    <div class="popover-label">Zoho App</div>
+                                    <div class="popover-value">Zoho SalesIQ (WhatsApp integration)</div>
+                                </div>
+                                <div class="popover-item">
+                                    <div class="popover-label">Where to configure</div>
+                                    <div class="popover-value">SalesIQ → Messaging Channels → WhatsApp → Templates (then connect in Flow)</div>
+                                </div>
+                                <div class="popover-item">
+                                    <div class="popover-label">Why it matters</div>
+                                    <div class="popover-value">WhatsApp has higher open rates than email. Clients see it faster and can reply instantly.</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flow-arrow"></div>
+
+                    <!-- Final Step -->
+                    <div class="flow-node final" onclick="togglePopover(this)">
+                        <div class="flow-node-title">✅ CRM Blueprint → "Onboarding"</div>
+                        <div class="flow-node-subtitle">Deal advances to next stage</div>
+                        <div class="popover">
+                            <div class="popover-title">Blueprint Advances Stage</div>
+                            <div class="popover-item">
+                                <div class="popover-label">What it does</div>
+                                <div class="popover-value">After all actions complete successfully, the CRM deal automatically moves from "Signed" to "Onboarding" stage.</div>
+                            </div>
+                            <div class="popover-item">
+                                <div class="popover-label">Zoho App</div>
+                                <div class="popover-value">Zoho CRM Blueprint</div>
+                            </div>
+                            <div class="popover-item">
+                                <div class="popover-label">Where to configure</div>
+                                <div class="popover-value">CRM → Setup → Blueprint → Deals → Create Transition</div>
+                            </div>
+                            <div class="popover-item">
+                                <div class="popover-label">Why it matters</div>
+                                <div class="popover-value">Deal stage reflects reality. Team can see at a glance which clients are in onboarding.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="callout info" style="margin-top: 24px;">
+                <div class="callout-icon">💡</div>
+                <div class="callout-content">
+                    <div class="callout-title">How it all connects</div>
+                    <p style="margin-bottom: 0;">Zoho Flow is the "conductor" — it watches CRM and orchestrates all the other apps. You configure the trigger once, and Flow handles the rest automatically. If any step fails, Flow can alert you so nothing falls through the cracks.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- C1: What does this automation need to do? -->
+        <section class="section" id="section-c1">
+            <div class="section-header">
+                <div class="section-number">C1</div>
+                <div>
+                    <div class="section-title">What This Automation Does</div>
+                    <div class="section-subtitle">Plain-language explanation of the Payroll Setup flow</div>
+                </div>
+            </div>
+
+            <p>When a client signs up for our Payroll service, a LOT needs to happen. Before automation, this was all manual. Let's see the difference:</p>
+
+            <div class="comparison">
+                <div class="comparison-col before">
+                    <div class="comparison-title">
+                        <span style="color: #dc2626;">❌</span> Before Automation (Manual)
+                    </div>
+                    <ul class="comparison-list">
+                        <li><span class="icon">⏰</span> Sales rep moves deal to "Signed" in CRM</li>
+                        <li><span class="icon">⏰</span> Sales rep sends email to onboarding: "New client!"</li>
+                        <li><span class="icon">⏰</span> Onboarding manually creates customer in Books</li>
+                        <li><span class="icon">⏰</span> Onboarding manually creates project in Projects</li>
+                        <li><span class="icon">⏰</span> Onboarding manually creates ticket in Desk</li>
+                        <li><span class="icon">⏰</span> Someone remembers to email the client welcome info</li>
+                        <li><span class="icon">⏰</span> Someone updates deal stage to "Onboarding"</li>
+                        <li><span class="icon">⚠️</span> <strong>Total time:</strong> 20-30 minutes per client</li>
+                        <li><span class="icon">⚠️</span> <strong>Error risk:</strong> High (forgotten steps, typos)</li>
+                    </ul>
+                </div>
+                <div class="comparison-col after">
+                    <div class="comparison-title">
+                        <span style="color: #10b981;">✅</span> After Automation
+                    </div>
+                    <ul class="comparison-list">
+                        <li><span class="icon">⚡</span> Sales rep moves deal to "Signed" in CRM</li>
+                        <li><span class="icon">🤖</span> <em>Everything else happens automatically:</em></li>
+                        <li><span class="icon">✓</span> Customer created in Books (instant)</li>
+                        <li><span class="icon">✓</span> Project created from template (instant)</li>
+                        <li><span class="icon">✓</span> Support ticket created and assigned (instant)</li>
+                        <li><span class="icon">✓</span> Welcome email sent to client (instant)</li>
+                        <li><span class="icon">✓</span> WhatsApp notification sent (instant)</li>
+                        <li><span class="icon">✓</span> Deal moves to "Onboarding" (instant)</li>
+                        <li><span class="icon">🎉</span> <strong>Total time:</strong> 5 seconds</li>
+                        <li><span class="icon">🎉</span> <strong>Error risk:</strong> Near zero</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title"><span class="card-icon">📝</span> What information do we collect?</div>
+                <p>The client fills out a form with their payroll details. This data flows through the entire system:</p>
+                <ul style="margin-left: 24px; color: var(--text-secondary);">
+                    <li>Company name and EIN (for tax filing)</li>
+                    <li>Pay frequency (weekly, bi-weekly, monthly)</li>
+                    <li>State of registration (affects tax calculations)</li>
+                    <li>Employee count (determines pricing tier)</li>
+                    <li>Bank details for direct deposits</li>
+                    <li>Contact info for communication</li>
+                    <li>Start date and billing plan</li>
+                </ul>
+            </div>
+
+            <div class="card">
+                <div class="card-title"><span class="card-icon">📬</span> What does the client receive?</div>
+                <p>Immediately after signing:</p>
+                <ul style="margin-left: 24px; color: var(--text-secondary);">
+                    <li><strong>Welcome email</strong> — confirms their signup, explains next steps, provides contact info</li>
+                    <li><strong>WhatsApp message</strong> — quick confirmation they can reply to with questions</li>
+                </ul>
+            </div>
+
+            <div class="card">
+                <div class="card-title"><span class="card-icon">👥</span> What does the internal team see?</div>
+                <p>The moment a deal is signed:</p>
+                <ul style="margin-left: 24px; color: var(--text-secondary);">
+                    <li><strong>In CRM:</strong> Deal appears in "Onboarding" stage</li>
+                    <li><strong>In Projects:</strong> New project with all setup tasks listed</li>
+                    <li><strong>In Desk:</strong> New ticket assigned to onboarding team</li>
+                    <li><strong>In Books:</strong> Customer ready for invoicing</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- C2: Data Mapping -->
+        <section class="section" id="section-c2">
+            <div class="section-header">
+                <div class="section-number">C2</div>
+                <div>
+                    <div class="section-title">Data Mapping</div>
+                    <div class="section-subtitle">What fields are needed and where they live</div>
+                </div>
+            </div>
+
+            <p>This table shows every piece of data we collect, where it comes from, and where it goes in Zoho. Use the filters to focus on what you need.</p>
+
+            <div class="table-filter">
+                <button class="filter-btn active" onclick="filterTable('all')">All Fields</button>
+                <button class="filter-btn" onclick="filterTable('required')">Required Only</button>
+            </div>
+
+            <div class="data-table-container">
+                <table class="data-table" id="dataTable">
+                    <thead>
+                        <tr>
+                            <th>Field</th>
+                            <th>What it is</th>
+                            <th>Comes from</th>
+                            <th>Goes to in Zoho</th>
+                            <th>Required?</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr data-required="true">
+                            <td><strong>Company Name</strong></td>
+                            <td>Legal business name</td>
+                            <td>Zoho Forms</td>
+                            <td>CRM (Account Name), Books (Customer Name), Projects (Project Name)</td>
+                            <td><span class="badge badge-required">Required</span></td>
+                        </tr>
+                        <tr data-required="true">
+                            <td><strong>EIN</strong></td>
+                            <td>Employer Identification Number (9 digits)</td>
+                            <td>Zoho Forms</td>
+                            <td>CRM (Custom Field), Books (Tax ID)</td>
+                            <td><span class="badge badge-required">Required</span></td>
+                        </tr>
+                        <tr data-required="true">
+                            <td><strong>Pay Frequency</strong></td>
+                            <td>Weekly / Bi-weekly / Monthly</td>
+                            <td>Zoho Forms (dropdown)</td>
+                            <td>CRM (Custom Field), Projects (Task template selection)</td>
+                            <td><span class="badge badge-required">Required</span></td>
+                        </tr>
+                        <tr data-required="true">
+                            <td><strong>State of Registration</strong></td>
+                            <td>US state where business is registered</td>
+                            <td>Zoho Forms (dropdown)</td>
+                            <td>CRM (Billing State), Books (State)</td>
+                            <td><span class="badge badge-required">Required</span></td>
+                        </tr>
+                        <tr data-required="true">
+                            <td><strong>Employee Count</strong></td>
+                            <td>Number of employees on payroll</td>
+                            <td>Zoho Forms (number)</td>
+                            <td>CRM (Custom Field)</td>
+                            <td><span class="badge badge-required">Required</span></td>
+                        </tr>
+
+                        <tr data-required="false">
+                            <td><strong>Bank Name</strong></td>
+                            <td>Name of business bank</td>
+                            <td>Zoho Forms</td>
+                            <td>CRM (Custom Field)</td>
+                            <td><span class="badge badge-optional">Optional</span></td>
+                        </tr>
+                        <tr data-required="false">
+                            <td><strong>Bank Routing Number</strong></td>
+                            <td>9-digit routing number</td>
+                            <td>Zoho Forms</td>
+                            <td>CRM (Custom Field - encrypted)</td>
+                            <td><span class="badge badge-optional">Optional</span></td>
+                        </tr>
+                        <tr data-required="false">
+                            <td><strong>Bank Account Number</strong></td>
+                            <td>Account number for deposits</td>
+                            <td>Zoho Forms</td>
+                            <td>CRM (Custom Field - encrypted)</td>
+                            <td><span class="badge badge-optional">Optional</span></td>
+                        </tr>
+                        <tr data-required="true">
+                            <td><strong>Contact Email</strong></td>
+                            <td>Primary contact email</td>
+                            <td>Zoho Forms</td>
+                            <td>CRM (Email), Books (Email), Desk (Contact Email)</td>
+                            <td><span class="badge badge-required">Required</span></td>
+                        </tr>
+                        <tr data-required="true">
+                            <td><strong>Contact Phone</strong></td>
+                            <td>Primary phone number</td>
+                            <td>Zoho Forms</td>
+                            <td>CRM (Phone), Books (Phone)</td>
+                            <td><span class="badge badge-required">Required</span></td>
+                        </tr>
+                        <tr data-required="true">
+                            <td><strong>Start Date</strong></td>
+                            <td>When payroll service begins</td>
+                            <td>Zoho Forms (date picker)</td>
+                            <td>CRM (Custom Field), Projects (Project Start Date)</td>
+                            <td><span class="badge badge-required">Required</span></td>
+                        </tr>
+                        <tr data-required="true">
+                            <td><strong>Billing Plan</strong></td>
+                            <td>Monthly / Quarterly / Annual</td>
+                            <td>Zoho Forms (dropdown)</td>
+                            <td>CRM (Custom Field), Books (Payment Terms)</td>
+                            <td><span class="badge badge-required">Required</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="callout info">
+                <div class="callout-icon">🔗</div>
+                <div class="callout-content">
+                    <div class="callout-title">How data flows</div>
+                    <p style="margin-bottom: 0;">The form submits to CRM first (as a Deal + Contact). Then Zoho Flow reads from CRM and pushes to Books, Projects, and Desk. This means CRM is the "source of truth" — all other apps pull from it.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- C3: Building the Form -->
+        <section class="section" id="section-c3">
+            <div class="section-header">
+                <div class="section-number">C3</div>
+                <div>
+                    <div class="section-title">Building the Form in Zoho Forms</div>
+                    <div class="section-subtitle">Step-by-step tutorial</div>
+                </div>
+            </div>
+
+            <div class="step">
+                <div class="step-header">
+                    <div class="step-number">1</div>
+                    <div class="step-title">Open Zoho Forms and create a new form</div>
+                </div>
+                <div class="step-body">
+                    <div class="menu-path">
+                        <span>Zoho One</span>
+                        <span class="separator">→</span>
+                        <span>Forms</span>
+                        <span class="separator">→</span>
+                        <span>Create Form</span>
+                        <span class="separator">→</span>
+                        <span>Blank Form</span>
+                    </div>
+                    <p>Name the form: <strong>"Payroll Setup - Client Information"</strong></p>
+                    
+                    <!-- Mockup: Zoho Forms create new form screen -->
+                    <div class="mockup-container">
+                        <div class="mockup-badge">📸 Add screenshot here</div>
+                        <div class="mockup-browser-bar">
+                            <div class="mockup-dots">
+                                <div class="mockup-dot red"></div>
+                                <div class="mockup-dot yellow"></div>
+                                <div class="mockup-dot green"></div>
+                            </div>
+                            <div class="mockup-app-name">Zoho Forms</div>
+                        </div>
+                        <div class="mockup-content">
+                            <div class="mockup-sidebar">
+                                <div style="font-size: 0.7rem; font-weight: 600; color: #475569; padding: 8px 10px; margin-bottom: 8px;">FIELD TYPES</div>
+                                <div class="mockup-sidebar-item">📝 Single Line</div>
+                                <div class="mockup-sidebar-item">📄 Multi Line</div>
+                                <div class="mockup-sidebar-item">📋 Dropdown</div>
+                                <div class="mockup-sidebar-item">☑️ Checkbox</div>
+                                <div class="mockup-sidebar-item">📅 Date</div>
+                                <div class="mockup-sidebar-item">📧 Email</div>
+                                <div class="mockup-sidebar-item">📞 Phone</div>
+                                <div class="mockup-sidebar-item">🔢 Number</div>
+                            </div>
+                            <div class="mockup-main">
+                                <div class="mockup-form-title">Payroll Setup - Client Information</div>
+                                <div style="border: 2px dashed #e2e8f0; border-radius: 8px; padding: 40px; text-align: center; color: #94a3b8;">
+                                    <div style="font-size: 2rem; margin-bottom: 8px;">+</div>
+                                    <div style="font-size: 0.85rem;">Drag fields here to build your form</div>
+                                </div>
+                                <div class="mockup-add-btn">
+                                    <span>+</span> Add Field
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="step">
+                <div class="step-header">
+                    <div class="step-number">2</div>
+                    <div class="step-title">Add the required fields</div>
+                </div>
+                <div class="step-body">
+                    <p>Drag these fields from the left panel in this order:</p>
+                    <ol style="margin-left: 24px; color: var(--text-secondary);">
+                        <li><strong>Single Line</strong> → Label: "Company Name" → Mark as Required ✓</li>
+                        <li><strong>Single Line</strong> → Label: "EIN" → Mark as Required ✓ → Add validation: 9 digits only</li>
+                        <li><strong>Dropdown</strong> → Label: "Pay Frequency" → Options: Weekly, Bi-weekly, Monthly → Required ✓</li>
+                        <li><strong>Dropdown</strong> → Label: "State of Registration" → Add all 50 US states → Required ✓</li>
+                        <li><strong>Number</strong> → Label: "Employee Count" → Min: 1 → Required ✓</li>
+                        <li><strong>Single Line</strong> → Label: "Bank Name"</li>
+                        <li><strong>Single Line</strong> → Label: "Bank Routing Number" → Validation: 9 digits</li>
+                        <li><strong>Single Line</strong> → Label: "Bank Account Number"</li>
+                        <li><strong>Email</strong> → Label: "Contact Email" → Required ✓</li>
+                        <li><strong>Phone</strong> → Label: "Contact Phone" → Required ✓</li>
+                        <li><strong>Date</strong> → Label: "Start Date" → Required ✓</li>
+                        <li><strong>Dropdown</strong> → Label: "Billing Plan" → Options: Monthly, Quarterly, Annual → Required ✓</li>
+                    </ol>
+                    
+                    <!-- Mockup: Form builder with all fields added -->
+                    <div class="mockup-container">
+                        <div class="mockup-badge">📸 Add screenshot here</div>
+                        <div class="mockup-browser-bar">
+                            <div class="mockup-dots">
+                                <div class="mockup-dot red"></div>
+                                <div class="mockup-dot yellow"></div>
+                                <div class="mockup-dot green"></div>
+                            </div>
+                            <div class="mockup-app-name">Zoho Forms — Form Builder</div>
+                        </div>
+                        <div class="mockup-content">
+                            <div class="mockup-sidebar">
+                                <div style="font-size: 0.7rem; font-weight: 600; color: #475569; padding: 8px 10px; margin-bottom: 8px;">FIELD TYPES</div>
+                                <div class="mockup-sidebar-item">📝 Single Line</div>
+                                <div class="mockup-sidebar-item">📄 Multi Line</div>
+                                <div class="mockup-sidebar-item">📋 Dropdown</div>
+                                <div class="mockup-sidebar-item">☑️ Checkbox</div>
+                                <div class="mockup-sidebar-item">📅 Date</div>
+                            </div>
+                            <div class="mockup-main" style="padding: 20px;">
+                                <div class="mockup-form-title">Payroll Setup - Client Information</div>
+                                <div class="mockup-field">
+                                    <div class="mockup-field-label">Company Name <span style="color: #ef4444;">*</span></div>
+                                    <div class="mockup-field-input">Acme Corporation</div>
+                                </div>
+                                <div class="mockup-field">
+                                    <div class="mockup-field-label">EIN <span style="color: #ef4444;">*</span></div>
+                                    <div class="mockup-field-input">12-3456789</div>
+                                </div>
+                                <div class="mockup-field">
+                                    <div class="mockup-field-label">Pay Frequency <span style="color: #ef4444;">*</span></div>
+                                    <div class="mockup-field-input" style="display: flex; justify-content: space-between; align-items: center;">
+                                        <span>Select...</span>
+                                        <span style="color: #94a3b8;">▼</span>
+                                    </div>
+                                </div>
+                                <div class="mockup-field">
+                                    <div class="mockup-field-label">Employee Count <span style="color: #ef4444;">*</span></div>
+                                    <div class="mockup-field-input">25</div>
+                                </div>
+                                <div class="mockup-field">
+                                    <div class="mockup-field-label">State <span style="color: #ef4444;">*</span></div>
+                                    <div class="mockup-field-input" style="display: flex; justify-content: space-between; align-items: center;">
+                                        <span>Florida</span>
+                                        <span style="color: #94a3b8;">▼</span>
+                                    </div>
+                                </div>
+                                <div class="mockup-field">
+                                    <div class="mockup-field-label">Contact Email <span style="color: #ef4444;">*</span></div>
+                                    <div class="mockup-field-input">contact@acme.com</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="step">
+                <div class="step-header">
+                    <div class="step-number">3</div>
+                    <div class="step-title">Set up conditional logic</div>
+                </div>
+                <div class="step-body">
+                    <p>When Pay Frequency = "Bi-weekly", we need to show extra fields for pay days.</p>
+                    <div class="menu-path">
+                        <span>Form Builder</span>
+                        <span class="separator">→</span>
+                        <span>Rules</span>
+                        <span class="separator">→</span>
+                        <span>Field Rules</span>
+                        <span class="separator">→</span>
+                        <span>+ New Rule</span>
+                    </div>
+                    <p>Configure the rule:</p>
+                    <ul style="margin-left: 24px; color: var(--text-secondary);">
+                        <li><strong>When:</strong> Pay Frequency <em>equals</em> "Bi-weekly"</li>
+                        <li><strong>Then:</strong> Show field "Pay Day 1" AND Show field "Pay Day 2"</li>
+                    </ul>
+                    <p>First, add two hidden dropdown fields:</p>
+                    <ul style="margin-left: 24px; color: var(--text-secondary);">
+                        <li><strong>Dropdown</strong> → "Pay Day 1" → Options: Monday-Friday → Hidden by default</li>
+                        <li><strong>Dropdown</strong> → "Pay Day 2" → Options: Monday-Friday → Hidden by default</li>
+                    </ul>
+                    
+                    <!-- Mockup: Field rules configuration panel -->
+                    <div class="mockup-container">
+                        <div class="mockup-badge">📸 Add screenshot here</div>
+                        <div class="mockup-browser-bar">
+                            <div class="mockup-dots">
+                                <div class="mockup-dot red"></div>
+                                <div class="mockup-dot yellow"></div>
+                                <div class="mockup-dot green"></div>
+                            </div>
+                            <div class="mockup-app-name">Zoho Forms — Field Rules</div>
+                        </div>
+                        <div class="mockup-main" style="padding: 24px;">
+                            <div class="mockup-form-title">Configure Field Rule</div>
+                            <div class="mockup-rule-container">
+                                <div class="mockup-rule-box">
+                                    <div class="mockup-rule-label">IF</div>
+                                    <div class="mockup-rule-content">
+                                        <div style="margin-bottom: 8px;">
+                                            <span style="background: #f1f5f9; padding: 4px 8px; border-radius: 4px; font-size: 0.75rem;">Pay Frequency</span>
+                                        </div>
+                                        <div style="display: flex; gap: 8px; align-items: center;">
+                                            <span style="color: #64748b; font-size: 0.75rem;">=</span>
+                                            <span style="background: #dbeafe; color: #1d4ed8; padding: 4px 10px; border-radius: 4px; font-size: 0.8rem;">Bi-weekly</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="mockup-rule-arrow">→</div>
+                                <div class="mockup-rule-box">
+                                    <div class="mockup-rule-label">THEN</div>
+                                    <div class="mockup-rule-content">
+                                        <div style="margin-bottom: 6px; display: flex; align-items: center; gap: 6px;">
+                                            <span style="color: #10b981;">✓</span>
+                                            <span style="font-size: 0.8rem;">Show: Pay Day 1</span>
+                                        </div>
+                                        <div style="display: flex; align-items: center; gap: 6px;">
+                                            <span style="color: #10b981;">✓</span>
+                                            <span style="font-size: 0.8rem;">Show: Pay Day 2</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div style="margin-top: 16px; display: flex; gap: 12px;">
+                                <button style="padding: 8px 20px; background: #3b82f6; color: white; border: none; border-radius: 6px; font-size: 0.85rem; font-weight: 500;">Save Rule</button>
+                                <button style="padding: 8px 20px; background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; border-radius: 6px; font-size: 0.85rem;">Cancel</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="step">
+                <div class="step-header">
+                    <div class="step-number">4</div>
+                    <div class="step-title">Connect the form to CRM</div>
+                </div>
+                <div class="step-body">
+                    <div class="menu-path">
+                        <span>Form Builder</span>
+                        <span class="separator">→</span>
+                        <span>Integrations</span>
+                        <span class="separator">→</span>
+                        <span>Zoho CRM</span>
+                        <span class="separator">→</span>
+                        <span>+ Add Integration</span>
+                    </div>
+                    <p>Configure the integration:</p>
+                    <ul style="margin-left: 24px; color: var(--text-secondary);">
+                        <li><strong>Module:</strong> Deals</li>
+                        <li><strong>Map fields:</strong>
+                            <ul>
+                                <li>Company Name → Deal Name</li>
+                                <li>Contact Email → Contact Email (creates linked Contact)</li>
+                                <li>All other fields → Custom fields in CRM</li>
+                            </ul>
+                        </li>
+                        <li><strong>Deal Stage:</strong> Set to "Signed" (this triggers the automation!)</li>
+                        <li><strong>Product:</strong> Set to "PAYROLL SET UP"</li>
+                    </ul>
+                    <div class="callout warning">
+                        <div class="callout-icon">⚠️</div>
+                        <div class="callout-content">
+                            <div class="callout-title">Important: Create custom fields first!</div>
+                            <p style="margin-bottom: 0;">Before connecting the form, make sure you've created all the custom fields in CRM (EIN, Pay Frequency, Employee Count, etc.). Go to CRM → Setup → Customization → Modules → Deals → Fields to add them.</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Mockup: CRM integration field mapping -->
+                    <div class="mockup-container">
+                        <div class="mockup-badge">📸 Add screenshot here</div>
+                        <div class="mockup-browser-bar">
+                            <div class="mockup-dots">
+                                <div class="mockup-dot red"></div>
+                                <div class="mockup-dot yellow"></div>
+                                <div class="mockup-dot green"></div>
+                            </div>
+                            <div class="mockup-app-name">Zoho Forms — Connect to CRM</div>
+                        </div>
+                        <div class="mockup-main" style="padding: 20px;">
+                            <div class="mockup-form-title">Connect to CRM — Field Mapping</div>
+                            <table class="mockup-table">
+                                <thead>
+                                    <tr>
+                                        <th>Form Field</th>
+                                        <th>CRM Field</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>Company Name</td>
+                                        <td>Account Name</td>
+                                        <td><span class="mockup-map-btn">Mapped ✓</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>EIN</td>
+                                        <td>Tax ID (Custom)</td>
+                                        <td><span class="mockup-map-btn">Mapped ✓</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Pay Frequency</td>
+                                        <td>Pay Frequency (Custom)</td>
+                                        <td><span class="mockup-map-btn">Mapped ✓</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Contact Email</td>
+                                        <td>Email</td>
+                                        <td><span class="mockup-map-btn">Mapped ✓</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>State</td>
+                                        <td>Billing State</td>
+                                        <td><span class="mockup-map-btn">Mapped ✓</span></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="step">
+                <div class="step-header">
+                    <div class="step-number">5</div>
+                    <div class="step-title">Publish and test</div>
+                </div>
+                <div class="step-body">
+                    <div class="menu-path">
+                        <span>Form Builder</span>
+                        <span class="separator">→</span>
+                        <span>Access</span>
+                        <span class="separator">→</span>
+                        <span>Live Form</span>
+                    </div>
+                    <p>Copy the form link. Test it by submitting sample data and checking that:</p>
+                    <ul style="margin-left: 24px; color: var(--text-secondary);">
+                        <li>A new Deal appears in CRM with stage "Signed"</li>
+                        <li>A new Contact is created and linked to the Deal</li>
+                        <li>All custom fields are populated correctly</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- C4: Setting up Zoho Flow -->
+        <section class="section" id="section-c4">
+            <div class="section-header">
+                <div class="section-number">C4</div>
+                <div>
+                    <div class="section-title">Setting Up Zoho Flow</div>
+                    <div class="section-subtitle">The automation engine that connects everything</div>
+                </div>
+            </div>
+
+            <div class="step">
+                <div class="step-header">
+                    <div class="step-number">1</div>
+                    <div class="step-title">Create a new Flow</div>
+                </div>
+                <div class="step-body">
+                    <div class="menu-path">
+                        <span>Zoho One</span>
+                        <span class="separator">→</span>
+                        <span>Flow</span>
+                        <span class="separator">→</span>
+                        <span>Create Flow</span>
+                        <span class="separator">→</span>
+                        <span>Create from scratch</span>
+                    </div>
+                    <p>Name your flow: <strong>"Payroll Setup - New Client Onboarding"</strong></p>
+                    
+                    <!-- Mockup: Create new Flow screen -->
+                    <div class="mockup-container">
+                        <div class="mockup-badge">📸 Add screenshot here</div>
+                        <div class="mockup-browser-bar">
+                            <div class="mockup-dots">
+                                <div class="mockup-dot red"></div>
+                                <div class="mockup-dot yellow"></div>
+                                <div class="mockup-dot green"></div>
+                            </div>
+                            <div class="mockup-app-name">Zoho Flow</div>
+                        </div>
+                        <div class="mockup-flow-canvas">
+                            <div class="mockup-flow-block trigger">
+                                <div class="mockup-flow-block-title">🔔 Trigger</div>
+                                <div class="mockup-flow-block-sub">CRM - Deal Stage Changed</div>
+                            </div>
+                            <div class="mockup-flow-arrow"></div>
+                            <div class="mockup-flow-block action" style="border: 2px dashed #cbd5e1; background: transparent;">
+                                <div class="mockup-flow-block-title" style="color: #64748b;">+ Add Action</div>
+                                <div class="mockup-flow-block-sub">Click to add your first action</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="step">
+                <div class="step-header">
+                    <div class="step-number">2</div>
+                    <div class="step-title">Configure the Trigger</div>
+                </div>
+                <div class="step-body">
+                    <p>Click "Configure Trigger" and set up:</p>
+                    <ul style="margin-left: 24px; color: var(--text-secondary);">
+                        <li><strong>App:</strong> Zoho CRM</li>
+                        <li><strong>Trigger:</strong> Record Updated (not Created — because form creates then updates stage)</li>
+                        <li><strong>Module:</strong> Deals</li>
+                        <li><strong>Conditions:</strong>
+                            <ul>
+                                <li>Stage <em>changed to</em> "Signed"</li>
+                                <li>Product <em>equals</em> "PAYROLL SET UP"</li>
+                            </ul>
+                        </li>
+                    </ul>
+                    <div class="callout info">
+                        <div class="callout-icon">💡</div>
+                        <div class="callout-content">
+                            <div class="callout-title">Why "changed to" matters</div>
+                            <p style="margin-bottom: 0;">Using "changed to" instead of "equals" ensures the automation only fires when the stage <em>just changed</em> — not every time the deal is edited.</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Mockup: Trigger configuration with conditions -->
+                    <div class="mockup-container">
+                        <div class="mockup-badge">📸 Add screenshot here</div>
+                        <div class="mockup-browser-bar">
+                            <div class="mockup-dots">
+                                <div class="mockup-dot red"></div>
+                                <div class="mockup-dot yellow"></div>
+                                <div class="mockup-dot green"></div>
+                            </div>
+                            <div class="mockup-app-name">Zoho Flow — Trigger Configuration</div>
+                        </div>
+                        <div class="mockup-main" style="padding: 20px;">
+                            <div class="mockup-form-title">Configure Trigger</div>
+                            <div class="mockup-config-panel">
+                                <div class="mockup-config-row">
+                                    <div class="mockup-config-label">App</div>
+                                    <div class="mockup-config-value">
+                                        <span style="display: inline-flex; align-items: center; gap: 6px;">
+                                            <span style="background: #3b82f6; color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.7rem;">CRM</span>
+                                            Zoho CRM
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="mockup-config-row">
+                                    <div class="mockup-config-label">Trigger</div>
+                                    <div class="mockup-config-value">Deal Stage Changed</div>
+                                </div>
+                                <div class="mockup-config-row">
+                                    <div class="mockup-config-label">Condition</div>
+                                    <div class="mockup-config-value">
+                                        Stage <span style="background: #fef3c7; color: #92400e; padding: 2px 6px; border-radius: 4px; font-size: 0.75rem;">changed to</span> "Signed"
+                                    </div>
+                                </div>
+                                <div class="mockup-config-row">
+                                    <div class="mockup-config-label">Filter</div>
+                                    <div class="mockup-config-value">
+                                        Product <span style="background: #fef3c7; color: #92400e; padding: 2px 6px; border-radius: 4px; font-size: 0.75rem;">=</span> "PAYROLL SET UP"
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="step">
+                <div class="step-header">
+                    <div class="step-number">3</div>
+                    <div class="step-title">Action 1: Create Customer in Zoho Books</div>
+                </div>
+                <div class="step-body">
+                    <p>Click the <strong>+</strong> button to add an action:</p>
+                    <ul style="margin-left: 24px; color: var(--text-secondary);">
+                        <li><strong>App:</strong> Zoho Books</li>
+                        <li><strong>Action:</strong> Create Customer</li>
+                        <li><strong>Field Mapping:</strong></li>
+                    </ul>
+                    <div class="code-block">
+Customer Name: ${Deals.Account_Name}
+Email: ${Deals.Contact.Email}
+Phone: ${Deals.Contact.Phone}
+Billing State: ${Deals.State_of_Registration}
+Tax ID: ${Deals.EIN}
+Payment Terms: ${Deals.Billing_Plan}</div>
+                    <div class="callout warning">
+                        <div class="callout-icon">⚠️</div>
+                        <div class="callout-content">
+                            <div class="callout-title">What could go wrong</div>
+                            <p style="margin-bottom: 0;">If a customer with the same name already exists in Books, this will fail. Consider adding a "Search Customer" step first, then use "Update if exists, Create if not" logic.</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Mockup: Books Create Customer action configuration -->
+                    <div class="mockup-container">
+                        <div class="mockup-badge">📸 Add screenshot here</div>
+                        <div class="mockup-browser-bar">
+                            <div class="mockup-dots">
+                                <div class="mockup-dot red"></div>
+                                <div class="mockup-dot yellow"></div>
+                                <div class="mockup-dot green"></div>
+                            </div>
+                            <div class="mockup-app-name">Zoho Flow — Action Configuration</div>
+                        </div>
+                        <div class="mockup-main" style="padding: 20px;">
+                            <div class="mockup-form-title">Create Customer — Zoho Books</div>
+                            <div class="mockup-config-panel">
+                                <div class="mockup-config-row">
+                                    <div class="mockup-config-label">Customer Name</div>
+                                    <div class="mockup-config-value">
+                                        <span class="mockup-merge-token">{{CRM.Account_Name}}</span>
+                                    </div>
+                                </div>
+                                <div class="mockup-config-row">
+                                    <div class="mockup-config-label">Email</div>
+                                    <div class="mockup-config-value">
+                                        <span class="mockup-merge-token">{{CRM.Email}}</span>
+                                    </div>
+                                </div>
+                                <div class="mockup-config-row">
+                                    <div class="mockup-config-label">Phone</div>
+                                    <div class="mockup-config-value">
+                                        <span class="mockup-merge-token">{{CRM.Phone}}</span>
+                                    </div>
+                                </div>
+                                <div class="mockup-config-row">
+                                    <div class="mockup-config-label">Tax ID</div>
+                                    <div class="mockup-config-value">
+                                        <span class="mockup-merge-token">{{CRM.Tax_ID}}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="step">
+                <div class="step-header">
+                    <div class="step-number">4</div>
+                    <div class="step-title">Action 2: Create Project from Template</div>
+                </div>
+                <div class="step-body">
+                    <p>Add another action:</p>
+                    <ul style="margin-left: 24px; color: var(--text-secondary);">
+                        <li><strong>App:</strong> Zoho Projects</li>
+                        <li><strong>Action:</strong> Create Project from Template</li>
+                        <li><strong>Template:</strong> "Payroll Setup Template" (create this first!)</li>
+                        <li><strong>Field Mapping:</strong></li>
+                    </ul>
+                    <div class="code-block">
+Project Name: Payroll Setup - ${Deals.Account_Name}
+Start Date: ${Deals.Start_Date}
+Owner: Onboarding Team</div>
+                    <p><strong>What the template should contain:</strong></p>
+                    <ul style="margin-left: 24px; color: var(--text-secondary);">
+                        <li>Task: "Collect employee information" (Due: Start Date)</li>
+                        <li>Task: "Set up payroll system" (Due: Start Date + 3 days)</li>
+                        <li>Task: "Configure tax withholdings" (Due: Start Date + 5 days)</li>
+                        <li>Task: "Run test payroll" (Due: Start Date + 7 days)</li>
+                        <li>Task: "Client training call" (Due: Start Date + 10 days)</li>
+                        <li>Milestone: "Payroll Go-Live" (Due: Start Date + 14 days)</li>
+                    </ul>
+                    <div class="callout warning">
+                        <div class="callout-icon">⚠️</div>
+                        <div class="callout-content">
+                            <div class="callout-title">What could go wrong</div>
+                            <p style="margin-bottom: 0;">If the template doesn't exist or was renamed, the Flow will fail. Double-check the template name matches exactly.</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Mockup: Projects Create from Template configuration -->
+                    <div class="mockup-container">
+                        <div class="mockup-badge">📸 Add screenshot here</div>
+                        <div class="mockup-browser-bar">
+                            <div class="mockup-dots">
+                                <div class="mockup-dot red"></div>
+                                <div class="mockup-dot yellow"></div>
+                                <div class="mockup-dot green"></div>
+                            </div>
+                            <div class="mockup-app-name">Zoho Flow — Create Project</div>
+                        </div>
+                        <div class="mockup-main" style="padding: 20px;">
+                            <div class="mockup-form-title">Create Project — Zoho Projects</div>
+                            <div class="mockup-config-panel">
+                                <div class="mockup-config-row">
+                                    <div class="mockup-config-label">Project Name</div>
+                                    <div class="mockup-config-value">
+                                        PAYROLL - <span class="mockup-merge-token">{{CRM.Account_Name}}</span>
+                                    </div>
+                                </div>
+                                <div class="mockup-config-row">
+                                    <div class="mockup-config-label">Template</div>
+                                    <div class="mockup-config-value">
+                                        <span style="display: inline-flex; align-items: center; gap: 8px; background: #f1f5f9; padding: 6px 12px; border-radius: 4px;">
+                                            <span>Payroll Setup Template</span>
+                                            <span style="color: #94a3b8;">▼</span>
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="mockup-config-row">
+                                    <div class="mockup-config-label">Owner</div>
+                                    <div class="mockup-config-value">
+                                        <span style="display: inline-flex; align-items: center; gap: 8px; background: #f1f5f9; padding: 6px 12px; border-radius: 4px;">
+                                            <span>Payroll Team</span>
+                                            <span style="color: #94a3b8;">▼</span>
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="mockup-config-row">
+                                    <div class="mockup-config-label">Start Date</div>
+                                    <div class="mockup-config-value">
+                                        <span class="mockup-merge-token">{{Today}}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="step">
+                <div class="step-header">
+                    <div class="step-number">5</div>
+                    <div class="step-title">Action 3: Create Ticket in Zoho Desk</div>
+                </div>
+                <div class="step-body">
+                    <p>Add another action:</p>
+                    <ul style="margin-left: 24px; color: var(--text-secondary);">
+                        <li><strong>App:</strong> Zoho Desk</li>
+                        <li><strong>Action:</strong> Create Ticket</li>
+                        <li><strong>Field Mapping:</strong></li>
+                    </ul>
+                    <div class="code-block">
+Subject: New Payroll Client: ${Deals.Account_Name}
+Description: A new payroll client has signed up.
+
+Company: ${Deals.Account_Name}
+EIN: ${Deals.EIN}
+Start Date: ${Deals.Start_Date}
+Employee Count: ${Deals.Employee_Count}
+
+Contact: ${Deals.Contact.Full_Name}
+Email: ${Deals.Contact.Email}
+Phone: ${Deals.Contact.Phone}
+
+Please begin onboarding process.
+Department: Onboarding
+Assignee: Onboarding Team
+Priority: High</div>
+                    <div class="callout warning">
+                        <div class="callout-icon">⚠️</div>
+                        <div class="callout-content">
+                            <div class="callout-title">What could go wrong</div>
+                            <p style="margin-bottom: 0;">If the Department or Assignee doesn't exist in Desk, the ticket creation will fail. Verify these exist before activating the Flow.</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Mockup: Desk Create Ticket configuration -->
+                    <div class="mockup-container">
+                        <div class="mockup-badge">📸 Add screenshot here</div>
+                        <div class="mockup-browser-bar">
+                            <div class="mockup-dots">
+                                <div class="mockup-dot red"></div>
+                                <div class="mockup-dot yellow"></div>
+                                <div class="mockup-dot green"></div>
+                            </div>
+                            <div class="mockup-app-name">Zoho Flow — Create Ticket</div>
+                        </div>
+                        <div class="mockup-main" style="padding: 20px;">
+                            <div class="mockup-form-title">Create Ticket — Zoho Desk</div>
+                            <div class="mockup-config-panel">
+                                <div class="mockup-config-row">
+                                    <div class="mockup-config-label">Subject</div>
+                                    <div class="mockup-config-value">
+                                        New Payroll Client: <span class="mockup-merge-token">{{CRM.Account_Name}}</span>
+                                    </div>
+                                </div>
+                                <div class="mockup-config-row">
+                                    <div class="mockup-config-label">Department</div>
+                                    <div class="mockup-config-value">Onboarding</div>
+                                </div>
+                                <div class="mockup-config-row">
+                                    <div class="mockup-config-label">Assignee</div>
+                                    <div class="mockup-config-value">Onboarding Team</div>
+                                </div>
+                                <div class="mockup-config-row">
+                                    <div class="mockup-config-label">Priority</div>
+                                    <div class="mockup-config-value">
+                                        <span style="background: #fef3c7; color: #d97706; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 600;">High</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="step">
+                <div class="step-header">
+                    <div class="step-number">6</div>
+                    <div class="step-title">Action 4: Send Welcome Email via ZeptoMail</div>
+                </div>
+                <div class="step-body">
+                    <p>Add the email action:</p>
+                    <ul style="margin-left: 24px; color: var(--text-secondary);">
+                        <li><strong>App:</strong> ZeptoMail</li>
+                        <li><strong>Action:</strong> Send Email</li>
+                        <li><strong>Use template:</strong> "Payroll Welcome Email" (create this in ZeptoMail first)</li>
+                        <li><strong>To:</strong> <code class="code-inline">${Deals.Contact.Email}</code></li>
+                        <li><strong>Merge fields:</strong> Map company name, contact name, start date</li>
+                    </ul>
+                    <p>See Section C6 for the full email template.</p>
+                    
+                    <!-- Mockup: ZeptoMail Send Email configuration -->
+                    <div class="mockup-container">
+                        <div class="mockup-badge">📸 Add screenshot here</div>
+                        <div class="mockup-browser-bar">
+                            <div class="mockup-dots">
+                                <div class="mockup-dot red"></div>
+                                <div class="mockup-dot yellow"></div>
+                                <div class="mockup-dot green"></div>
+                            </div>
+                            <div class="mockup-app-name">Zoho Flow — Send Email</div>
+                        </div>
+                        <div class="mockup-main" style="padding: 20px;">
+                            <div class="mockup-form-title">Send Email — ZeptoMail</div>
+                            <div class="mockup-config-panel">
+                                <div class="mockup-config-row">
+                                    <div class="mockup-config-label">To</div>
+                                    <div class="mockup-config-value">
+                                        <span class="mockup-merge-token">{{CRM.Contact.Email}}</span>
+                                    </div>
+                                </div>
+                                <div class="mockup-config-row">
+                                    <div class="mockup-config-label">Template</div>
+                                    <div class="mockup-config-value">Payroll Welcome Email</div>
+                                </div>
+                                <div class="mockup-config-row">
+                                    <div class="mockup-config-label">Subject</div>
+                                    <div class="mockup-config-value">
+                                        Welcome to Prodezk Payroll, <span class="mockup-merge-token">{{Account_Name}}</span>! 🎉
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="step">
+                <div class="step-header">
+                    <div class="step-number">7</div>
+                    <div class="step-title">Configure Error Handling</div>
+                </div>
+                <div class="step-body">
+                    <p>Click on each action and expand "Error Handling":</p>
+                    <div class="menu-path">
+                        <span>Action</span>
+                        <span class="separator">→</span>
+                        <span>Settings (⚙️)</span>
+                        <span class="separator">→</span>
+                        <span>Error Handling</span>
+                    </div>
+                    <p>Configure:</p>
+                    <ul style="margin-left: 24px; color: var(--text-secondary);">
+                        <li><strong>On Error:</strong> Continue to next action (don't stop the whole flow)</li>
+                        <li><strong>Notify:</strong> Send email to admin@prodezk.com</li>
+                        <li><strong>Include:</strong> Error details and deal information</li>
+                    </ul>
+                    <p>This way, if one action fails (e.g., Books customer already exists), the other actions still run, and you get notified to fix it manually.</p>
+                    
+                    <!-- Mockup: Error handling configuration -->
+                    <div class="mockup-container">
+                        <div class="mockup-badge">📸 Add screenshot here</div>
+                        <div class="mockup-browser-bar">
+                            <div class="mockup-dots">
+                                <div class="mockup-dot red"></div>
+                                <div class="mockup-dot yellow"></div>
+                                <div class="mockup-dot green"></div>
+                            </div>
+                            <div class="mockup-app-name">Zoho Flow — Error Handling</div>
+                        </div>
+                        <div class="mockup-main" style="padding: 20px;">
+                            <div class="mockup-form-title">Error Handling Settings</div>
+                            <div class="mockup-config-panel">
+                                <div class="mockup-config-row">
+                                    <div class="mockup-config-label">On Error</div>
+                                    <div class="mockup-config-value">
+                                        <span style="display: inline-flex; align-items: center; gap: 6px;">
+                                            <span style="width: 16px; height: 16px; border-radius: 50%; background: #10b981; display: inline-block;"></span>
+                                            Continue to next action
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="mockup-config-row">
+                                    <div class="mockup-config-label">Notify</div>
+                                    <div class="mockup-config-value">
+                                        <span style="display: inline-flex; align-items: center; gap: 6px;">
+                                            ☑️ Send email to: admin@prodezk.com
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="mockup-config-row">
+                                    <div class="mockup-config-label">Include</div>
+                                    <div class="mockup-config-value">
+                                        <span style="display: inline-flex; gap: 8px; flex-wrap: wrap;">
+                                            <span style="background: #dbeafe; color: #1d4ed8; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem;">Error details</span>
+                                            <span style="background: #dbeafe; color: #1d4ed8; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem;">Deal info</span>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="step">
+                <div class="step-header">
+                    <div class="step-number">8</div>
+                    <div class="step-title">Turn on the Flow</div>
+                </div>
+                <div class="step-body">
+                    <p>Click the toggle in the top right to activate your Flow. It will now trigger automatically whenever a Payroll deal moves to "Signed".</p>
+                    <div class="callout success">
+                        <div class="callout-icon">✅</div>
+                        <div class="callout-content">
+                            <div class="callout-title">Before activating</div>
+                            <p style="margin-bottom: 0;">Run a test first! Use the "Test" button in Flow to simulate the trigger with a sample deal. Check that all actions complete successfully before going live.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- C5: CRM Blueprint -->
+
+        <!-- C5: CRM Blueprint -->
+        <section class="section" id="section-c5">
+            <div class="section-header">
+                <div class="section-number">C5</div>
+                <div>
+                    <div class="section-title">CRM Blueprint — Advancing the Stage</div>
+                    <div class="section-subtitle">Controlling when deals can move between stages</div>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-title"><span class="card-icon">🗺️</span> What is a Blueprint?</div>
+                <p>A Blueprint is Zoho CRM's rule engine for stage transitions. It enforces that certain conditions are met before a deal can move forward — for example, requiring the client's EIN to be filled in before the deal advances to "Onboarding."</p>
+            </div>
+            <div class="step">
+                <div class="step-header"><div class="step-number">1</div><div class="step-title">Access Blueprint in CRM</div></div>
+                <div class="step-body">
+                    <div class="menu-path"><span>Zoho CRM</span><span class="separator">→</span><span>Setup ⚙️</span><span class="separator">→</span><span>Process Management</span><span class="separator">→</span><span>Blueprint</span></div>
+                    <p>Click <strong>+ Create Blueprint</strong> and select the <strong>Deals</strong> module.</p>
+                </div>
+            </div>
+            <div class="step">
+                <div class="step-header"><div class="step-number">2</div><div class="step-title">Create the "Signed → Onboarding" transition</div></div>
+                <div class="step-body">
+                    <p>In the Blueprint canvas, drag from the <strong>Signed</strong> state to the <strong>Onboarding</strong> state to create a transition arrow. Name it: <strong>"Begin Onboarding"</strong></p>
+                    <div class="info-box">💡 Each arrow in the Blueprint canvas is a transition. You control who can trigger it and what conditions must be met first.</div>
+                </div>
+            </div>
+            <div class="step">
+                <div class="step-header"><div class="step-number">3</div><div class="step-title">Set required fields before the transition can happen</div></div>
+                <div class="step-body">
+                    <p>Click the transition arrow → go to <strong>"Before"</strong> tab → add these required fields:</p>
+                    <ul style="margin: 12px 0 12px 20px; line-height: 2;">
+                        <li><strong>EIN / Tax ID</strong> — must be filled</li>
+                        <li><strong>Pay Frequency</strong> — must be selected</li>
+                        <li><strong>Employee Count</strong> — must be filled</li>
+                        <li><strong>State</strong> — must be selected</li>
+                    </ul>
+                    <div class="warning-box">⚠️ If these fields are empty, CRM will not allow the stage to advance. The team member will see a validation error prompting them to fill in the missing data.</div>
+                </div>
+            </div>
+            <div class="step">
+                <div class="step-header"><div class="step-number">4</div><div class="step-title">Set who can trigger this transition</div></div>
+                <div class="step-body">
+                    <p>In the transition settings → <strong>"Who can perform this transition"</strong> → select the relevant roles (e.g., Sales, Admin). Save and activate the Blueprint.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- C6: Notification Templates -->
+        <section class="section" id="section-c6">
+            <div class="section-header">
+                <div class="section-number">C6</div>
+                <div>
+                    <div class="section-title">Notification Templates</div>
+                    <div class="section-subtitle">What the client receives — email and WhatsApp</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title"><span class="card-icon">📧</span> Email Template — ZeptoMail</div>
+                <div class="step">
+                    <div class="step-header"><div class="step-number">1</div><div class="step-title">Where to build it</div></div>
+                    <div class="step-body">
+                        <div class="menu-path"><span>ZeptoMail</span><span class="separator">→</span><span>Mail Templates</span><span class="separator">→</span><span>+ Create Template</span></div>
+                        <p>Name the template: <strong>"Payroll Setup — Welcome Email"</strong></p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-header"><div class="step-number">2</div><div class="step-title">Email content</div></div>
+                    <div class="step-body">
+                        <p><strong>Subject:</strong> <code class="code-block" style="display:inline; padding: 3px 8px;">Welcome to Prodezk Payroll — Next Steps for {{Contact.Company_Name}}</code></p>
+                        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 20px; margin-top: 16px; font-size: 0.9rem; line-height: 1.8;">
+                            <p>Hi <strong>{{Contact.First_Name}}</strong>,</p><br>
+                            <p>Welcome to Prodezk. We've received your Payroll Setup request and your account is now being configured.</p><br>
+                            <p><strong>What happens next:</strong></p>
+                            <ul style="margin-left: 20px;">
+                                <li>Your payroll file will be set up within 2 business days</li>
+                                <li>You'll receive a confirmation once your first payroll run is scheduled</li>
+                                <li>Your dedicated contact is <strong>{{Owner.Name}}</strong> — reach them at <strong>{{Owner.Email}}</strong></li>
+                            </ul><br>
+                            <p>If you have questions, reply to this email or call us at (305) 000-0000.</p><br>
+                            <p>Best,<br>The Prodezk Payroll Team</p>
+                        </div>
+                        <div class="info-box" style="margin-top: 12px;">💡 Merge fields like <code>{{Contact.Company_Name}}</code> are automatically filled in by ZeptoMail using data from Zoho CRM. Don't type the actual values — type the merge field exactly as shown.</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card" style="margin-top: 24px;">
+                <div class="card-title"><span class="card-icon">💬</span> WhatsApp Template — Zoho SalesIQ</div>
+                <div class="step">
+                    <div class="step-header"><div class="step-number">1</div><div class="step-title">Where to build it</div></div>
+                    <div class="step-body">
+                        <div class="menu-path"><span>Zoho SalesIQ</span><span class="separator">→</span><span>Settings</span><span class="separator">→</span><span>WhatsApp</span><span class="separator">→</span><span>Message Templates</span><span class="separator">→</span><span>+ New Template</span></div>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-header"><div class="step-number">2</div><div class="step-title">Message content</div></div>
+                    <div class="step-body">
+                        <div style="background: #dcfce7; border-radius: 12px; border-top-left-radius: 2px; padding: 16px 20px; max-width: 340px; font-size: 0.9rem; line-height: 1.7; position: relative;">
+                            <p>Hi <strong>{{1}}</strong> 👋</p>
+                            <p>Your Prodezk Payroll account for <strong>{{2}}</strong> is now being set up. We'll have everything ready within 2 business days.</p>
+                            <p>Questions? Reply here or call (305) 000-0000.</p>
+                            <p style="font-size: 0.75rem; color: #65a30d; margin-top: 8px;">— Prodezk Team</p>
+                        </div>
+                        <p style="margin-top: 12px; font-size: 0.85rem; color: #64748b;"><code>{{1}}</code> = Client First Name &nbsp;|&nbsp; <code>{{2}}</code> = Company Name</p>
+                    </div>
+                </div>
+                <div class="warning-box" style="margin: 16px 16px 0;">
+                    ⚠️ <strong>Meta Approval Required.</strong> Every WhatsApp template must be approved by Meta before it can be sent. Submit the template in SalesIQ and expect 24–72 hours for approval. Rejections are common on the first try — keep the message simple and avoid promotional language.
+                </div>
+            </div>
+        </section>
+
+        <!-- C7: Testing Protocol -->
+        <section class="section" id="section-c7">
+            <div class="section-header">
+                <div class="section-number">C7</div>
+                <div>
+                    <div class="section-title">Testing Protocol</div>
+                    <div class="section-subtitle">Verify every piece works before going live</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <p>Check off each item as you test it. <strong>Do not skip any step.</strong> Every checkbox must be green before you move to C8.</p>
+                <div id="c7-progress" style="margin: 16px 0; font-weight: 600; color: #0069d9;">Checked: <span id="c7-count">0</span> / <span id="c7-total">0</span></div>
+            </div>
+
+            <div class="card" style="margin-top: 16px;">
+                <div class="card-title"><span class="card-icon">🔬</span> Unit Tests — Test each piece individually</div>
+                <div class="checklist" id="checklist-unit">
+                    <label class="checklist-item"><input type="checkbox" data-group="c7"> Form submits successfully when all required fields are filled</label>
+                    <label class="checklist-item"><input type="checkbox" data-group="c7"> Form shows an error when required fields are empty</label>
+                    <label class="checklist-item"><input type="checkbox" data-group="c7"> Conditional logic: selecting "Bi-weekly" shows Pay Day 1 and Pay Day 2 fields</label>
+                    <label class="checklist-item"><input type="checkbox" data-group="c7"> EIN field rejects non-numeric input</label>
+                    <label class="checklist-item"><input type="checkbox" data-group="c7"> Flow triggers when a test CRM deal is moved to "Signed" stage</label>
+                    <label class="checklist-item"><input type="checkbox" data-group="c7"> Customer is created in Zoho Books with correct name and EIN</label>
+                    <label class="checklist-item"><input type="checkbox" data-group="c7"> Blueprint prevents stage advancement when required fields are empty</label>
+                </div>
+            </div>
+
+            <div class="card" style="margin-top: 16px;">
+                <div class="card-title"><span class="card-icon">🔗</span> Integration Tests — Test the full chain</div>
+                <div class="checklist" id="checklist-integration">
+                    <label class="checklist-item"><input type="checkbox" data-group="c7"> CRM Deal "Signed" → Books customer created automatically</label>
+                    <label class="checklist-item"><input type="checkbox" data-group="c7"> Books customer → Projects project created from template</label>
+                    <label class="checklist-item"><input type="checkbox" data-group="c7"> Desk ticket created with correct title and assignment</label>
+                    <label class="checklist-item"><input type="checkbox" data-group="c7"> Welcome email arrives in test inbox with correct merge fields</label>
+                    <label class="checklist-item"><input type="checkbox" data-group="c7"> WhatsApp message sends to test number (if approved)</label>
+                    <label class="checklist-item"><input type="checkbox" data-group="c7"> CRM Blueprint advances to "Onboarding" after Zoho Flow completes</label>
+                    <label class="checklist-item"><input type="checkbox" data-group="c7"> No duplicate customer or project records created</label>
+                </div>
+            </div>
+
+            <div class="card" style="margin-top: 16px;">
+                <div class="card-title"><span class="card-icon">✅</span> UAT Sign-Off — Real-world test with management</div>
+                <div class="checklist" id="checklist-uat">
+                    <label class="checklist-item"><input type="checkbox" data-group="c7"> Andres or Office Manager completes a full end-to-end test run</label>
+                    <label class="checklist-item"><input type="checkbox" data-group="c7"> Client data appears correctly in CRM, Books, and Projects</label>
+                    <label class="checklist-item"><input type="checkbox" data-group="c7"> Internal team receives correct notification</label>
+                    <label class="checklist-item"><input type="checkbox" data-group="c7"> Management approves the automation for go-live</label>
+                </div>
+            </div>
+
+            <div class="card" style="margin-top: 16px; border-left: 4px solid #ef4444;">
+                <div class="card-title"><span class="card-icon">🔄</span> Rollback Procedure — If something breaks in production</div>
+                <div class="step">
+                    <div class="step-header"><div class="step-number">1</div><div class="step-title">Pause the Zoho Flow immediately</div></div>
+                    <div class="step-body">
+                        <div class="menu-path"><span>Zoho Flow</span><span class="separator">→</span><span>My Flows</span><span class="separator">→</span><span>Find the flow</span><span class="separator">→</span><span>Toggle OFF</span></div>
+                        <p>This stops any further automated actions instantly.</p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-header"><div class="step-number">2</div><div class="step-title">Check what already ran</div></div>
+                    <div class="step-body">
+                        <div class="menu-path"><span>Zoho Flow</span><span class="separator">→</span><span>Flow History</span><span class="separator">→</span><span>Find failed runs</span></div>
+                        <p>Identify which records were affected. Manually correct or delete any bad data in Books, Projects, or Desk.</p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-header"><div class="step-number">3</div><div class="step-title">Notify Andres</div></div>
+                    <div class="step-body"><p>Report what broke, which clients were affected, and what manual steps were taken to correct it.</p></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- C8: Go-Live Checklist -->
+        <section class="section" id="section-c8">
+            <div class="section-header">
+                <div class="section-number">C8</div>
+                <div>
+                    <div class="section-title">Go-Live Checklist</div>
+                    <div class="section-subtitle">Final checks before turning it on for real clients</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title"><span class="card-icon">🚦</span> Pre-Launch Requirements</div>
+                <p style="margin-bottom: 16px;">Every item below must be checked before going live. No exceptions.</p>
+                <div class="checklist" id="checklist-golive">
+                    <label class="checklist-item"><input type="checkbox" data-group="c8"> All C7 tests passed and signed off</label>
+                    <label class="checklist-item"><input type="checkbox" data-group="c8"> Error handling configured in Zoho Flow (email alert to admin on failure)</label>
+                    <label class="checklist-item"><input type="checkbox" data-group="c8"> Payroll team briefed — they know what the automation does and what they no longer need to do manually</label>
+                    <label class="checklist-item"><input type="checkbox" data-group="c8"> Rollback procedure documented and accessible to the team</label>
+                    <label class="checklist-item"><input type="checkbox" data-group="c8"> ZeptoMail email template active and tested with real domain</label>
+                    <label class="checklist-item"><input type="checkbox" data-group="c8"> WhatsApp template approved by Meta (or confirmed not needed at launch)</label>
+                    <label class="checklist-item"><input type="checkbox" data-group="c8"> Andres final sign-off received</label>
+                </div>
+            </div>
+
+            <div class="card" style="margin-top: 24px;">
+                <div class="card-title"><span class="card-icon">📊</span> Post-Launch Monitoring</div>
+                <p style="margin-bottom: 16px;">For the first two weeks after go-live, check the following every day:</p>
+
+                <div class="step">
+                    <div class="step-header"><div class="step-number">1</div><div class="step-title">Check Zoho Flow execution logs daily</div></div>
+                    <div class="step-body">
+                        <div class="menu-path"><span>Zoho Flow</span><span class="separator">→</span><span>My Flows</span><span class="separator">→</span><span>Click your flow</span><span class="separator">→</span><span>Flow History tab</span></div>
+                        <p><strong>Successful run:</strong> Green checkmark, all actions show "Completed"<br>
+                        <strong>Failed run:</strong> Red X — click to see which action failed and why</p>
+                        <div class="warning-box">⚠️ A failed run means a real client did NOT get processed automatically. You must manually complete the steps for that client and then fix the flow.</div>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-header"><div class="step-number">2</div><div class="step-title">Confirm records in Books and Projects</div></div>
+                    <div class="step-body"><p>Spot-check 2–3 new payroll clients per week. Confirm their customer record in Books and their project in Projects were created correctly with all the right fields.</p></div>
+                </div>
+                <div class="step">
+                    <div class="step-header"><div class="step-number">3</div><div class="step-title">Who to notify if something fails</div></div>
+                    <div class="step-body">
+                        <p>Immediately notify: <strong>Andres Platts</strong> (CEO) and the <strong>Office Manager</strong>.<br>
+                        Include: what failed, which client, what manual action was taken, and the fix plan.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card" style="margin-top: 24px; background: linear-gradient(135deg, #0069d9 0%, #0ea5e9 100%); color: white; border: none;">
+                <div class="card-title" style="color: white;"><span class="card-icon">🎉</span> You're Done — For This Automation</div>
+                <p style="color: rgba(255,255,255,0.9);">If every section from B through C8 is complete and checked, the PAYROLL SET UP automation is live. Now apply this exact same process to every other automation in the roadmap. The pattern never changes — only the data fields and templates do.</p>
+                <p style="margin-top: 12px; color: rgba(255,255,255,0.75); font-size: 0.85rem;">Next up: Accounting Plan SET UP → Registered Agent SET UP → Sales Tax Monthly → ...</p>
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        // ── Scrollspy: update sidebar active state ──────────────────────
+        const sections = document.querySelectorAll('.section[id]');
+        const navItems = document.querySelectorAll('.nav-item');
+
+        function updateActiveNav() {
+            let currentId = '';
+            sections.forEach(section => {
+                const rect = section.getBoundingClientRect();
+                if (rect.top <= 120) currentId = section.id;
+            });
+            navItems.forEach(item => {
+                const href = item.getAttribute('href');
+                item.classList.toggle('active', href === '#' + currentId);
+            });
+        }
+
+        window.addEventListener('scroll', updateActiveNav, { passive: true });
+        updateActiveNav();
+
+        // ── Sidebar toggle (mobile) ──────────────────────────────────────
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            sidebar.classList.toggle('open');
+            overlay.classList.toggle('active');
+        }
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', () => {
+                if (window.innerWidth <= 1024) toggleSidebar();
+            });
+        });
+
+        // ── Theme toggle ────────────────────────────────────────────────
+        function toggleTheme() {
+            const body = document.body;
+            const icon = document.getElementById('themeIcon');
+            const text = document.getElementById('themeText');
+            if (body.getAttribute('data-theme') === 'dark') {
+                body.removeAttribute('data-theme');
+                icon.textContent = '🌙';
+                text.textContent = 'Dark Mode';
+                localStorage.setItem('theme', 'light');
+            } else {
+                body.setAttribute('data-theme', 'dark');
+                icon.textContent = '☀️';
+                text.textContent = 'Light Mode';
+                localStorage.setItem('theme', 'dark');
+            }
+        }
+        if (localStorage.getItem('theme') === 'dark') {
+            document.body.setAttribute('data-theme', 'dark');
+            document.getElementById('themeIcon').textContent = '☀️';
+            document.getElementById('themeText').textContent = 'Light Mode';
+        }
+
+        // ── Flow node popovers ───────────────────────────────────────────
+        document.querySelectorAll('.flow-node').forEach(node => {
+            node.addEventListener('click', (e) => {
+                e.stopPropagation();
+                document.querySelectorAll('.flow-node').forEach(n => n.classList.remove('active'));
+                node.classList.toggle('active');
+            });
+        });
+        document.addEventListener('click', () => {
+            document.querySelectorAll('.flow-node').forEach(n => n.classList.remove('active'));
+        });
+
+        // ── Checklist with localStorage + progress tracking ─────────────
+        function initChecklists() {
+            const allBoxes = document.querySelectorAll('input[type="checkbox"]');
+            let totalC7 = 0, totalC8 = 0;
+
+            allBoxes.forEach((box, i) => {
+                const key = 'chk_' + i;
+                box.checked = localStorage.getItem(key) === '1';
+                box.addEventListener('change', () => {
+                    localStorage.setItem(key, box.checked ? '1' : '0');
+                    updateProgress();
+                });
+                if (box.dataset.group === 'c7') totalC7++;
+                if (box.dataset.group === 'c8') totalC8++;
+            });
+
+            // Set totals
+            const t7 = document.getElementById('c7-total');
+            if (t7) t7.textContent = totalC7;
+
+            updateProgress();
+        }
+
+        function updateProgress() {
+            const allBoxes = document.querySelectorAll('input[type="checkbox"]');
+            let checkedAll = 0, checkedC7 = 0, totalC7 = 0;
+
+            allBoxes.forEach(box => {
+                if (box.checked) checkedAll++;
+                if (box.dataset.group === 'c7') {
+                    totalC7++;
+                    if (box.checked) checkedC7++;
+                }
+            });
+
+            const badge = document.getElementById('progressBadge');
+            if (badge) badge.textContent = 'Progress: ' + checkedAll + ' / ' + allBoxes.length;
+
+            const c7Count = document.getElementById('c7-count');
+            if (c7Count) c7Count.textContent = checkedC7;
+        }
+
+        // ── Table filter ────────────────────────────────────────────────
+        function filterTable(type) {
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            event.target.classList.add('active');
+            document.querySelectorAll('.data-table tbody tr').forEach(row => {
+                if (type === 'all') { row.style.display = ''; return; }
+                const req = row.querySelector('.req-badge');
+                row.style.display = (req && req.classList.contains('required')) ? '' : 'none';
+            });
+        }
+
+        initChecklists();
+    </script>
+</body>
+</html>
