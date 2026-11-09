@@ -1,0 +1,840 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Su propio agente de IA, paso a paso | ProDezk</title>
+<meta name="description" content="Guía corta para instalar Sentō: un agente de IA que trabaja 24/7, responde por Telegram y construye páginas web y aplicaciones para su negocio.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Su propio agente de IA, paso a paso">
+<meta property="og:description" content="Qué cuentas necesita, dónde instalarlo y cómo ponerlo a trabajar. Preparado por ProDezk.">
+<meta property="og:url" content="https://prodezk.github.io/guia-agentes-ia/">
+<meta property="og:image" content="https://prodezk.github.io/guia-agentes-ia/og.png">
+<meta property="og:locale" content="es_LA">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preload" href="fonts/bricolage-grotesque-latin-standard-normal.woff2" as="font" type="font/woff2" crossorigin>
+<style>
+  /* Self-hosted fonts (SIL Open Font License, see fonts/LICENSE-*.txt) */
+  @font-face { font-family: "Bricolage Grotesque"; font-style: normal; font-display: swap; font-weight: 200 800; font-stretch: 75% 100%;
+    src: url(fonts/bricolage-grotesque-latin-ext-standard-normal.woff2) format("woff2");
+    unicode-range: U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF; }
+  @font-face { font-family: "Bricolage Grotesque"; font-style: normal; font-display: swap; font-weight: 200 800; font-stretch: 75% 100%;
+    src: url(fonts/bricolage-grotesque-latin-standard-normal.woff2) format("woff2");
+    unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD; }
+  @font-face { font-family: "JetBrains Mono"; font-style: normal; font-display: swap; font-weight: 400;
+    src: url(fonts/jetbrains-mono-latin-400-normal.woff2) format("woff2"); }
+  @font-face { font-family: "JetBrains Mono"; font-style: normal; font-display: swap; font-weight: 500;
+    src: url(fonts/jetbrains-mono-latin-500-normal.woff2) format("woff2"); }
+
+  :root {
+    --paper: #F3F5F7;
+    --surface: #FFFFFF;
+    --ink: #18233A;
+    --ink-2: #26365A;
+    --graphite: #55617A;
+    --line: #D5DBE3;
+    --saffron: #F5B700;
+    --saffron-soft: #FFF4CC;
+    --pine: #0E6E5C;
+    --pine-soft: #E3F2EE;
+    --signal: #B42318;
+    --signal-soft: #FCEBE9;
+    --display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+    --body: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+    --mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font: 400 1.125rem/1.6 var(--body);
+  }
+  img, svg { display: block; max-width: 100%; }
+  a { color: var(--ink); text-decoration-color: var(--saffron); text-decoration-thickness: 2px; text-underline-offset: 3px; }
+  a:hover { text-decoration-color: var(--ink); }
+  :focus-visible { outline: 3px solid var(--saffron); outline-offset: 3px; border-radius: 4px; }
+
+  .wrap { max-width: 66rem; margin: 0 auto; padding: 0 1.25rem; }
+  .wrap > * { max-width: 46rem; }
+  .wrap > .flow { max-width: none; }
+  .wrap > .compare, .wrap > .notes { max-width: 52rem; }
+
+  /* ---------- Type ---------- */
+  h1, h2, h3 { font-family: var(--display); color: var(--ink); margin: 0; }
+  h1 {
+    font-size: clamp(2.6rem, 8vw, 4.75rem);
+    font-weight: 750;
+    font-stretch: 78%;
+    line-height: 0.98;
+    letter-spacing: -0.015em;
+    max-width: 12ch;
+  }
+  h2 {
+    font-size: clamp(1.75rem, 4.2vw, 2.4rem);
+    font-weight: 700;
+    font-stretch: 85%;
+    line-height: 1.08;
+    letter-spacing: -0.01em;
+    margin-bottom: 0.75rem;
+  }
+  h3 { font-size: 1.25rem; font-weight: 650; line-height: 1.25; }
+  p { margin: 0 0 1rem; }
+  .lead { font-size: 1.25rem; line-height: 1.55; color: var(--ink); max-width: 36rem; }
+  .muted { color: var(--graphite); }
+  .small { font-size: 0.95rem; }
+
+  section { padding-top: 4.5rem; }
+  section > .wrap > p:first-of-type { max-width: 40rem; }
+  body { font-optical-sizing: auto; }
+
+  /* ---------- Tag (luggage label) ---------- */
+  .tag {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    background: var(--saffron);
+    color: var(--ink);
+    font: 650 0.8rem/1 var(--display);
+    padding: 0.42em 0.75em 0.42em 1.35em;
+    border-radius: 0 5px 5px 0;
+    clip-path: polygon(0.6em 0, 100% 0, 100% 100%, 0.6em 100%, 0 50%);
+    white-space: nowrap;
+  }
+  .tag::before {
+    content: "";
+    position: absolute;
+    left: 0.62em;
+    top: 50%;
+    width: 0.38em;
+    height: 0.38em;
+    margin-top: -0.19em;
+    border-radius: 50%;
+    background: var(--paper);
+  }
+  .tag--pine { background: var(--pine); color: #fff; }
+
+  /* ---------- Hero ---------- */
+  .hero { padding: 3.5rem 0 1.5rem; }
+  .hero .byline { margin-top: 1.5rem; font-size: 0.95rem; color: var(--graphite); }
+  .hero .lead { margin-top: 1.5rem; }
+
+  /* ---------- Flow diagram ---------- */
+  .flow { margin: 2.25rem 0 0; }
+  .flow svg { width: 100%; height: auto; }
+  .flow-tall { display: none; max-width: 24rem; margin: 0 auto; }
+  @media (max-width: 760px) {
+    .flow-wide { display: none; }
+    .flow-tall { display: block; }
+  }
+  .flow .node { fill: var(--surface); stroke: var(--line); stroke-width: 1.5; }
+  .flow .node--agent { fill: var(--ink); stroke: var(--ink); }
+  .flow .pill { fill: var(--ink-2); }
+  .flow .icon { fill: none; stroke: var(--ink); stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; }
+  .flow .icon--light { stroke: #fff; }
+  .flow .icon--saffron { stroke: var(--saffron); }
+  .flow .t-name { font: 700 21px var(--display); fill: var(--ink); }
+  .flow .t-name--light { fill: #fff; font-size: 28px; }
+  .flow .t-role { font: 400 14px var(--body); fill: var(--graphite); }
+  .flow .t-role--light { fill: #B9C3D6; }
+  .flow .t-pill { font: 650 16px var(--display); fill: #fff; }
+  .flow .tag-shape { fill: var(--saffron); }
+  .flow .tag-hole { fill: var(--paper); }
+  .flow .t-tag { font: 650 12.5px var(--display); fill: var(--ink); }
+  .flow .wire { fill: none; stroke: var(--ink); stroke-width: 2; }
+  .flow .num { fill: var(--saffron); stroke: var(--paper); stroke-width: 3; }
+  .flow .t-num { font: 750 14px var(--display); fill: var(--ink); text-anchor: middle; dominant-baseline: central; }
+
+  .flow-steps {
+    list-style: none;
+    padding: 0;
+    margin: 2rem auto 0;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.25rem;
+    max-width: 66rem;
+  }
+  .flow-steps li { display: grid; grid-template-columns: 1.9rem 1fr; gap: 0.6rem; font-size: 1rem; line-height: 1.45; }
+  .num-dot {
+    width: 1.75rem; height: 1.75rem; border-radius: 50%;
+    background: var(--saffron); color: var(--ink);
+    display: grid; place-items: center;
+    font: 750 0.9rem/1 var(--display);
+  }
+  @media (max-width: 860px) { .flow-steps { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 520px) { .flow-steps { grid-template-columns: 1fr; } }
+
+  /* draw-in: the page's single orchestrated moment */
+  @media (prefers-reduced-motion: no-preference) {
+    .flow .wire { stroke-dasharray: 220; stroke-dashoffset: 220; animation: draw 0.7s ease-out forwards; }
+    .flow .num, .flow .t-num { opacity: 0; animation: pop 0.3s ease-out forwards; }
+    .flow .d1 { animation-delay: 0.3s; }
+    .flow .d2 { animation-delay: 0.9s; }
+    .flow .d3 { animation-delay: 1.3s; }
+    .flow .d4 { animation-delay: 1.9s; }
+    @keyframes draw { to { stroke-dashoffset: 0; } }
+    @keyframes pop { to { opacity: 1; } }
+  }
+
+  /* ---------- Two roles ---------- */
+  .roles { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin: 1.75rem 0 1.25rem; }
+  .role { border-left: 3px solid var(--saffron); padding: 0.25rem 0 0.25rem 1rem; }
+  .role h3 { margin-bottom: 0.35rem; }
+  .role p { margin: 0; color: var(--graphite); font-size: 1.05rem; }
+  @media (max-width: 560px) { .roles { grid-template-columns: 1fr; } }
+
+  /* ---------- Tool list ---------- */
+  .tools { list-style: none; padding: 0; margin: 2rem 0 0; border-bottom: 1px solid var(--line); }
+  .tool {
+    display: grid;
+    grid-template-columns: 3.25rem 1fr;
+    gap: 1.1rem;
+    padding: 1.4rem 0;
+    border-top: 1px solid var(--line);
+  }
+  .tool-icon {
+    width: 3.25rem; height: 3.25rem;
+    border-radius: 12px;
+    background: var(--surface);
+    border: 1.5px solid var(--line);
+    display: grid; place-items: center;
+  }
+  .tool-icon svg { width: 1.6rem; height: 1.6rem; fill: none; stroke: var(--ink); stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; }
+  .tool-head { display: flex; flex-wrap: wrap; align-items: center; gap: 0.4rem 0.75rem; margin-bottom: 0.35rem; }
+  .tool-head h3 a { text-decoration: none; }
+  .tool-head h3 a:hover { text-decoration: underline; text-decoration-color: var(--saffron); }
+  .tool p { margin: 0 0 0.5rem; }
+  .cost { font-size: 0.98rem; color: var(--graphite); margin: 0; }
+  .cost strong { color: var(--ink); }
+
+  /* ---------- Where it lives ---------- */
+  .compare { display: grid; grid-template-columns: 1.1fr 1fr; gap: 1.25rem; margin-top: 1.75rem; }
+  .option { border-radius: 16px; padding: 1.5rem; border: 1.5px solid var(--line); background: transparent; }
+  .option--pick { background: var(--surface); border: 2px solid var(--pine); }
+  .option h3 { margin: 0.6rem 0 0.9rem; }
+  .option ul { list-style: none; padding: 0; margin: 0; }
+  .option li { display: grid; grid-template-columns: 1.4rem 1fr; gap: 0.5rem; margin-bottom: 0.55rem; font-size: 1.02rem; line-height: 1.45; }
+  .option li svg { width: 1.15rem; height: 1.15rem; margin-top: 0.2rem; fill: none; stroke-width: 2.25; stroke-linecap: round; stroke-linejoin: round; }
+  .yes svg { stroke: var(--pine); }
+  .no svg { stroke: var(--signal); }
+  .option .price { margin-top: 1rem; padding-top: 0.9rem; border-top: 1px solid var(--line); font-size: 0.98rem; color: var(--graphite); }
+  @media (max-width: 680px) { .compare { grid-template-columns: 1fr; } }
+
+  /* ---------- Steps ---------- */
+  .steps { list-style: none; padding: 0; margin: 2rem 0 0; counter-reset: step; }
+  .step { position: relative; display: grid; grid-template-columns: 2.5rem minmax(0, 1fr); gap: 1rem; padding-bottom: 1.75rem; counter-increment: step; }
+  .step > div { min-width: 0; }
+  .step::before {
+    content: counter(step);
+    width: 2.5rem; height: 2.5rem; border-radius: 50%;
+    background: var(--saffron); color: var(--ink);
+    display: grid; place-items: center;
+    font: 750 1.05rem/1 var(--display);
+    position: relative; z-index: 1;
+  }
+  .step::after {
+    content: ""; position: absolute; left: calc(1.25rem - 1px); top: 2.5rem; bottom: 0;
+    width: 2px; background: var(--line);
+  }
+  .step:last-child::after { display: none; }
+  .step h3 { margin: 0.45rem 0 0.35rem; }
+  .step p { margin: 0 0 0.6rem; color: var(--ink); }
+  .step p.muted { color: var(--graphite); font-size: 1rem; }
+
+  .cmd {
+    display: flex; align-items: stretch;
+    background: var(--ink); color: #E8ECF3;
+    border-radius: 10px; overflow: hidden;
+    margin: 0.4rem 0 0.6rem;
+  }
+  .cmd code {
+    flex: 1; min-width: 0;
+    font: 400 0.88rem/1.5 var(--mono);
+    padding: 0.8rem 1rem;
+    white-space: pre-wrap; overflow-wrap: anywhere;
+  }
+  .cmd button {
+    flex: none;
+    font: 650 0.85rem/1 var(--display);
+    background: var(--ink-2); color: #fff;
+    border: 0; border-left: 1px solid #34466F;
+    padding: 0 1rem; cursor: pointer;
+    min-width: 5.5rem;
+  }
+  .cmd button:hover { background: #31446C; }
+  .cmd button.done { background: var(--pine); }
+  code.inline { font: 500 0.9em var(--mono); background: var(--surface); border: 1px solid var(--line); border-radius: 5px; padding: 0.05em 0.35em; }
+
+  /* ---------- Commands table ---------- */
+  table { width: 100%; border-collapse: collapse; margin-top: 1.5rem; font-size: 1.02rem; }
+  th, td { text-align: left; padding: 0.75rem 0.5rem 0.75rem 0; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { font: 650 0.95rem var(--display); color: var(--graphite); }
+  td:first-child { white-space: nowrap; padding-right: 1.25rem; }
+
+  /* ---------- Cost ---------- */
+  .costs { margin-top: 1.75rem; }
+  .cost-row { display: grid; grid-template-columns: 10.5rem 1fr 7.5rem; gap: 1rem; align-items: center; padding: 0.7rem 0; border-top: 1px solid var(--line); }
+  .cost-row:last-of-type { border-bottom: 1px solid var(--line); }
+  .cost-name { font: 650 1rem var(--display); }
+  .cost-amt { text-align: right; font-size: 1rem; font-variant-numeric: tabular-nums; }
+  .track { position: relative; height: 0.85rem; background: #E6EAF0; border-radius: 999px; }
+  .bar { position: absolute; top: 0; bottom: 0; border-radius: 999px; background: var(--ink); }
+  .bar--range { background: repeating-linear-gradient(135deg, var(--ink) 0 4px, #3A4B72 4px 8px); }
+  .cost-total { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; margin-top: 1.1rem; }
+  .cost-total strong { font: 750 clamp(1.6rem, 4.5vw, 2.1rem)/1 var(--display); font-stretch: 85%; }
+  .legend { display: flex; flex-wrap: wrap; gap: 1.25rem; font-size: 0.92rem; color: var(--graphite); margin-top: 0.9rem; }
+  .legend span { display: inline-flex; align-items: center; gap: 0.45rem; }
+  .legend i { width: 1.4rem; height: 0.7rem; border-radius: 999px; display: inline-block; background: var(--ink); }
+  .legend i.r { background: repeating-linear-gradient(135deg, var(--ink) 0 4px, #3A4B72 4px 8px); }
+  @media (max-width: 560px) {
+    .cost-row { grid-template-columns: 1fr auto; row-gap: 0.4rem; }
+    .cost-row .track { grid-column: 1 / -1; grid-row: 2; }
+  }
+
+  /* ---------- Notes ---------- */
+  .notes { display: grid; gap: 1rem; margin-top: 1.75rem; }
+  .note { display: grid; grid-template-columns: 2.25rem 1fr; gap: 0.9rem; padding: 1.1rem 1.25rem; border-radius: 14px; background: var(--surface); border: 1.5px solid var(--line); }
+  .note svg { width: 1.6rem; height: 1.6rem; fill: none; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; margin-top: 0.15rem; }
+  .note--warn { background: var(--signal-soft); border-color: #F2C4BE; }
+  .note--warn svg { stroke: var(--signal); }
+  .note--info svg { stroke: var(--graphite); }
+  .note h3 { font-size: 1.1rem; margin: 0 0 0.3rem; }
+  .note p { margin: 0; font-size: 1.02rem; line-height: 1.5; }
+
+  /* ---------- Checklist ---------- */
+  .progress { display: flex; align-items: center; gap: 1rem; margin-top: 1.5rem; }
+  .progress-track { flex: 1; height: 0.6rem; background: #E6EAF0; border-radius: 999px; overflow: hidden; }
+  .progress-fill { height: 100%; width: 0; background: var(--pine); border-radius: 999px; transition: width 0.25s ease; }
+  .progress-label { font: 650 0.95rem var(--display); color: var(--graphite); white-space: nowrap; }
+  .checklist { list-style: none; padding: 0; margin: 1rem 0 0; }
+  .checklist li { border-top: 1px solid var(--line); }
+  .checklist li:last-child { border-bottom: 1px solid var(--line); }
+  .checklist label { display: grid; grid-template-columns: 1.6rem 1fr; gap: 0.8rem; align-items: center; padding: 0.8rem 0; cursor: pointer; }
+  .checklist input { appearance: none; -webkit-appearance: none; margin: 0; width: 1.5rem; height: 1.5rem; border: 2px solid var(--graphite); border-radius: 6px; background: var(--surface); display: grid; place-items: center; cursor: pointer; }
+  .checklist input::after { content: ""; width: 0.45rem; height: 0.8rem; border: solid #fff; border-width: 0 3px 3px 0; transform: rotate(45deg) translate(-1px, -1px); opacity: 0; }
+  .checklist input:checked { background: var(--pine); border-color: var(--pine); }
+  .checklist input:checked::after { opacity: 1; }
+  .checklist input:checked + span { color: var(--graphite); text-decoration: line-through; text-decoration-color: var(--graphite); }
+
+  /* ---------- Footer ---------- */
+  footer { margin-top: 5rem; padding: 2.5rem 0 3.5rem; border-top: 1px solid var(--line); font-size: 0.95rem; color: var(--graphite); }
+  footer h2 { font-size: 1.15rem; font-stretch: 100%; margin-bottom: 0.6rem; }
+  footer ul { margin: 0 0 1.75rem; padding-left: 1.1rem; }
+  footer li { margin-bottom: 0.3rem; }
+  footer a { color: var(--graphite); }
+  .signoff { color: var(--ink); font-family: var(--display); font-weight: 650; }
+
+  @media (max-width: 520px) {
+    body { font-size: 1.0625rem; }
+    section { padding-top: 3.5rem; }
+    .lead { font-size: 1.15rem; }
+    .cmd button { min-width: 4.75rem; padding: 0 0.75rem; }
+  }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap wrap--wide">
+    <h1>Su propio agente de IA, paso a paso</h1>
+    <p class="lead">Una guía corta para poner a trabajar a Sentō: un asistente que funciona día y noche, recibe instrucciones por Telegram y puede construir páginas web y aplicaciones para su negocio.</p>
+    <p class="byline">Preparado por ProDezk. Actualizado el 9 de noviembre de 2026.</p>
+
+    <figure class="flow" aria-labelledby="flow-cap">
+      <!-- Wide diagram -->
+      <svg class="flow-wide" viewBox="0 0 1040 400" role="img" aria-label="Diagrama: usted escribe por Telegram al agente Sentō, que trabaja en un servidor de Hostinger con Claude como cerebro, guarda el código en GitHub y lo publica con Vercel y Supabase.">
+        <defs>
+          <marker id="arrow-w" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0 0 L10 5 L0 10 z" fill="#18233A"/>
+          </marker>
+        </defs>
+
+        <!-- wires -->
+        <line class="wire d1" x1="200" y1="205" x2="266" y2="205" marker-end="url(#arrow-w)"/>
+        <line class="wire d3" x1="560" y1="205" x2="626" y2="205" marker-end="url(#arrow-w)"/>
+        <path class="wire d4" d="M810 190 C838 190 832 85 856 85" marker-end="url(#arrow-w)"/>
+        <path class="wire d4" d="M810 220 C838 220 832 325 856 325" marker-end="url(#arrow-w)"/>
+
+        <!-- Usted -->
+        <rect class="node" x="20" y="150" width="180" height="110" rx="14"/>
+        <g transform="translate(38 168) scale(1.15)"><g class="icon"><rect x="7" y="2.5" width="10" height="19" rx="2.5"/><path d="M11 18.5h2"/></g></g>
+        <text class="t-name" x="38" y="222">Usted</text>
+        <text class="t-role" x="38" y="244">escribe por Telegram</text>
+        <g transform="translate(36 139)"><path class="tag-shape" d="M8 0 H136 a3 3 0 0 1 3 3 V19 a3 3 0 0 1 -3 3 H8 L0 11 Z"/><circle class="tag-hole" cx="10" cy="11" r="2.6"/><text class="t-tag" x="19" y="15.5">La línea directa</text></g>
+
+        <!-- Agent -->
+        <rect class="node node--agent" x="270" y="110" width="290" height="200" rx="16"/>
+        <g transform="translate(288 130) scale(1.15)"><g class="icon icon--light"><rect x="3.5" y="4" width="17" height="6.5" rx="1.5"/><rect x="3.5" y="13.5" width="17" height="6.5" rx="1.5"/><path d="M7 7.25h.01M7 16.75h.01"/></g></g>
+        <text class="t-name t-name--light" x="288" y="190">Sentō</text>
+        <text class="t-role t-role--light" x="288" y="213">Su agente, trabajando 24/7</text>
+        <text class="t-role t-role--light" x="288" y="232">en un servidor de Hostinger</text>
+        <rect class="pill" x="288" y="248" width="254" height="44" rx="22"/>
+        <g transform="translate(300 258)"><g class="icon icon--saffron"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2V16h5v-.1c0-.8.4-1.5 1-2A6 6 0 0 0 12 3z"/></g></g>
+        <text class="t-pill" x="332" y="276">El cerebro: Claude</text>
+        <g transform="translate(286 99)"><path class="tag-shape" d="M8 0 H95 a3 3 0 0 1 3 3 V19 a3 3 0 0 1 -3 3 H8 L0 11 Z"/><circle class="tag-hole" cx="10" cy="11" r="2.6"/><text class="t-tag" x="19" y="15.5">La oficina</text></g>
+
+        <!-- GitHub -->
+        <rect class="node" x="630" y="150" width="180" height="110" rx="14"/>
+        <g transform="translate(648 168) scale(1.15)"><g class="icon"><rect x="4" y="3" width="16" height="18" rx="1.5"/><path d="M4 12h16M10 7.5h4M10 16.5h4"/></g></g>
+        <text class="t-name" x="648" y="222">GitHub</text>
+        <text class="t-role" x="648" y="244">guarda el código</text>
+        <g transform="translate(646 139)"><path class="tag-shape" d="M8 0 H95 a3 3 0 0 1 3 3 V19 a3 3 0 0 1 -3 3 H8 L0 11 Z"/><circle class="tag-hole" cx="10" cy="11" r="2.6"/><text class="t-tag" x="19" y="15.5">El archivo</text></g>
+
+        <!-- Vercel -->
+        <rect class="node" x="860" y="30" width="160" height="110" rx="14"/>
+        <g transform="translate(878 48) scale(1.15)"><g class="icon"><path d="M4 9.5V20h16V9.5"/><path d="M3 9.5l1.5-5.5h15L21 9.5z"/><path d="M10 20v-5h4v5"/></g></g>
+        <text class="t-name" x="878" y="102">Vercel</text>
+        <text class="t-role" x="878" y="124">publica su app</text>
+        <g transform="translate(876 19)"><path class="tag-shape" d="M8 0 H95 a3 3 0 0 1 3 3 V19 a3 3 0 0 1 -3 3 H8 L0 11 Z"/><circle class="tag-hole" cx="10" cy="11" r="2.6"/><text class="t-tag" x="19" y="15.5">La vitrina</text></g>
+
+        <!-- Supabase -->
+        <rect class="node" x="860" y="270" width="160" height="110" rx="14"/>
+        <g transform="translate(878 288) scale(1.15)"><g class="icon"><ellipse cx="12" cy="5.5" rx="7.5" ry="2.75"/><path d="M4.5 5.5v13c0 1.5 3.4 2.75 7.5 2.75s7.5-1.25 7.5-2.75v-13"/><path d="M4.5 12c0 1.5 3.4 2.75 7.5 2.75s7.5-1.25 7.5-2.75"/></g></g>
+        <text class="t-name" x="878" y="342">Supabase</text>
+        <text class="t-role" x="878" y="364">guarda sus datos</text>
+        <g transform="translate(876 259)"><path class="tag-shape" d="M8 0 H116 a3 3 0 0 1 3 3 V19 a3 3 0 0 1 -3 3 H8 L0 11 Z"/><circle class="tag-hole" cx="10" cy="11" r="2.6"/><text class="t-tag" x="19" y="15.5">Los registros</text></g>
+
+        <!-- step numbers -->
+        <circle class="num d1" cx="233" cy="205" r="13"/><text class="t-num d1" x="233" y="205">1</text>
+        <circle class="num d2" cx="546" cy="250" r="13"/><text class="t-num d2" x="546" y="250">2</text>
+        <circle class="num d3" cx="593" cy="205" r="13"/><text class="t-num d3" x="593" y="205">3</text>
+        <circle class="num d4" cx="831" cy="134" r="13"/><text class="t-num d4" x="831" y="134">4</text>
+        <circle class="num d4" cx="831" cy="276" r="13"/><text class="t-num d4" x="831" y="276">4</text>
+      </svg>
+
+      <!-- Tall diagram (phones) -->
+      <svg class="flow-tall" viewBox="0 0 360 730" role="img" aria-label="Diagrama: usted escribe por Telegram al agente Sentō, que trabaja en un servidor de Hostinger con Claude como cerebro, guarda el código en GitHub y lo publica con Vercel y Supabase.">
+        <defs>
+          <marker id="arrow-t" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0 0 L10 5 L0 10 z" fill="#18233A"/>
+          </marker>
+        </defs>
+
+        <line class="wire d1" x1="180" y1="130" x2="180" y2="176" marker-end="url(#arrow-t)"/>
+        <line class="wire d3" x1="180" y1="380" x2="180" y2="426" marker-end="url(#arrow-t)"/>
+        <line class="wire d4" x1="97" y1="520" x2="97" y2="584" marker-end="url(#arrow-t)"/>
+        <line class="wire d4" x1="262" y1="520" x2="262" y2="584" marker-end="url(#arrow-t)"/>
+
+        <!-- Usted -->
+        <rect class="node" x="30" y="40" width="300" height="90" rx="14"/>
+        <g transform="translate(46 66) scale(1.15)"><g class="icon"><rect x="7" y="2.5" width="10" height="19" rx="2.5"/><path d="M11 18.5h2"/></g></g>
+        <text class="t-name" x="90" y="84">Usted</text>
+        <text class="t-role" x="90" y="106">escribe por Telegram</text>
+        <g transform="translate(46 29)"><path class="tag-shape" d="M8 0 H136 a3 3 0 0 1 3 3 V19 a3 3 0 0 1 -3 3 H8 L0 11 Z"/><circle class="tag-hole" cx="10" cy="11" r="2.6"/><text class="t-tag" x="19" y="15.5">La línea directa</text></g>
+
+        <!-- Agent -->
+        <rect class="node node--agent" x="30" y="180" width="300" height="200" rx="16"/>
+        <g transform="translate(46 204) scale(1.15)"><g class="icon icon--light"><rect x="3.5" y="4" width="17" height="6.5" rx="1.5"/><rect x="3.5" y="13.5" width="17" height="6.5" rx="1.5"/><path d="M7 7.25h.01M7 16.75h.01"/></g></g>
+        <text class="t-name t-name--light" x="90" y="228">Sentō</text>
+        <text class="t-role t-role--light" x="48" y="268">Su agente, trabajando 24/7</text>
+        <text class="t-role t-role--light" x="48" y="287">en un servidor de Hostinger</text>
+        <rect class="pill" x="48" y="308" width="264" height="46" rx="23"/>
+        <g transform="translate(62 319)"><g class="icon icon--saffron"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2V16h5v-.1c0-.8.4-1.5 1-2A6 6 0 0 0 12 3z"/></g></g>
+        <text class="t-pill" x="94" y="337">El cerebro: Claude</text>
+        <g transform="translate(46 169)"><path class="tag-shape" d="M8 0 H95 a3 3 0 0 1 3 3 V19 a3 3 0 0 1 -3 3 H8 L0 11 Z"/><circle class="tag-hole" cx="10" cy="11" r="2.6"/><text class="t-tag" x="19" y="15.5">La oficina</text></g>
+
+        <!-- GitHub -->
+        <rect class="node" x="30" y="430" width="300" height="90" rx="14"/>
+        <g transform="translate(46 456) scale(1.15)"><g class="icon"><rect x="4" y="3" width="16" height="18" rx="1.5"/><path d="M4 12h16M10 7.5h4M10 16.5h4"/></g></g>
+        <text class="t-name" x="90" y="474">GitHub</text>
+        <text class="t-role" x="90" y="496">guarda el código</text>
+        <g transform="translate(46 419)"><path class="tag-shape" d="M8 0 H95 a3 3 0 0 1 3 3 V19 a3 3 0 0 1 -3 3 H8 L0 11 Z"/><circle class="tag-hole" cx="10" cy="11" r="2.6"/><text class="t-tag" x="19" y="15.5">El archivo</text></g>
+
+        <!-- Vercel -->
+        <rect class="node" x="20" y="600" width="155" height="110" rx="14"/>
+        <g transform="translate(36 620) scale(1.1)"><g class="icon"><path d="M4 9.5V20h16V9.5"/><path d="M3 9.5l1.5-5.5h15L21 9.5z"/><path d="M10 20v-5h4v5"/></g></g>
+        <text class="t-name" x="36" y="672" style="font-size:19px">Vercel</text>
+        <text class="t-role" x="36" y="694" style="font-size:13px">publica su app</text>
+        <g transform="translate(34 589)"><path class="tag-shape" d="M8 0 H95 a3 3 0 0 1 3 3 V19 a3 3 0 0 1 -3 3 H8 L0 11 Z"/><circle class="tag-hole" cx="10" cy="11" r="2.6"/><text class="t-tag" x="19" y="15.5">La vitrina</text></g>
+
+        <!-- Supabase -->
+        <rect class="node" x="185" y="600" width="155" height="110" rx="14"/>
+        <g transform="translate(201 620) scale(1.1)"><g class="icon"><ellipse cx="12" cy="5.5" rx="7.5" ry="2.75"/><path d="M4.5 5.5v13c0 1.5 3.4 2.75 7.5 2.75s7.5-1.25 7.5-2.75v-13"/><path d="M4.5 12c0 1.5 3.4 2.75 7.5 2.75s7.5-1.25 7.5-2.75"/></g></g>
+        <text class="t-name" x="201" y="672" style="font-size:19px">Supabase</text>
+        <text class="t-role" x="201" y="694" style="font-size:13px">guarda sus datos</text>
+        <g transform="translate(199 589)"><path class="tag-shape" d="M8 0 H116 a3 3 0 0 1 3 3 V19 a3 3 0 0 1 -3 3 H8 L0 11 Z"/><circle class="tag-hole" cx="10" cy="11" r="2.6"/><text class="t-tag" x="19" y="15.5">Los registros</text></g>
+
+        <circle class="num d1" cx="180" cy="153" r="13"/><text class="t-num d1" x="180" y="153">1</text>
+        <circle class="num d2" cx="312" cy="308" r="13"/><text class="t-num d2" x="312" y="308">2</text>
+        <circle class="num d3" cx="180" cy="403" r="13"/><text class="t-num d3" x="180" y="403">3</text>
+        <circle class="num d4" cx="97" cy="550" r="13"/><text class="t-num d4" x="97" y="550">4</text>
+        <circle class="num d4" cx="262" cy="550" r="13"/><text class="t-num d4" x="262" y="550">4</text>
+      </svg>
+
+      <figcaption id="flow-cap">
+        <ol class="flow-steps">
+          <li><span class="num-dot" aria-hidden="true">1</span><span>Usted le escribe al agente por Telegram, como a un empleado.</span></li>
+          <li><span class="num-dot" aria-hidden="true">2</span><span>El agente usa Claude para entender el pedido y hacer el trabajo.</span></li>
+          <li><span class="num-dot" aria-hidden="true">3</span><span>El código que escribe queda guardado en GitHub.</span></li>
+          <li><span class="num-dot" aria-hidden="true">4</span><span>Vercel publica la app en internet y Supabase guarda sus datos y usuarios.</span></li>
+        </ol>
+      </figcaption>
+    </figure>
+  </div>
+</header>
+
+<main>
+
+  <section id="que-es">
+    <div class="wrap">
+      <h2>Qué hace Sentō</h2>
+      <p>Sentō es un programa gratuito y de código abierto que convierte a Claude en un empleado digital disponible las 24 horas. Usted le da instrucciones por mensaje, como si le escribiera a una persona de su equipo.</p>
+      <div class="roles">
+        <div class="role">
+          <h3>Como asistente</h3>
+          <p>Responde correos, agenda citas y da seguimiento a pendientes.</p>
+        </div>
+        <div class="role">
+          <h3>Como constructor</h3>
+          <p>Crea páginas web, aplicaciones y automatizaciones.</p>
+        </div>
+      </div>
+      <p class="muted">El software no cuesta. Usted paga Claude y el servidor donde corre el agente.</p>
+    </div>
+  </section>
+
+  <section id="herramientas">
+    <div class="wrap">
+      <h2>Lo que necesita su agente</h2>
+      <p>Piense en el agente como un empleado nuevo: necesita un cerebro, una oficina, una línea directa, un archivo, una vitrina y un libro de registros. Cada uno es una cuenta que usted abre a nombre de su empresa.</p>
+
+      <ul class="tools">
+        <li class="tool">
+          <div class="tool-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2V16h5v-.1c0-.8.4-1.5 1-2A6 6 0 0 0 12 3z"/></svg></div>
+          <div>
+            <div class="tool-head"><h3><a href="https://claude.ai" target="_blank" rel="noopener">Claude</a></h3><span class="tag">El cerebro</span></div>
+            <p>La inteligencia artificial de Anthropic. Entiende sus instrucciones y escribe el código.</p>
+            <p class="cost"><strong>Pro, US$20/mes</strong> o Max, US$100–200/mes.</p>
+          </div>
+        </li>
+        <li class="tool">
+          <div class="tool-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3.5" y="4" width="17" height="6.5" rx="1.5"/><rect x="3.5" y="13.5" width="17" height="6.5" rx="1.5"/><path d="M7 7.25h.01M7 16.75h.01"/></svg></div>
+          <div>
+            <div class="tool-head"><h3><a href="https://www.hostinger.com/vps-hosting" target="_blank" rel="noopener">Hostinger VPS</a></h3><span class="tag">La oficina</span></div>
+            <p>Una computadora virtual encendida 24/7 donde vive el agente.</p>
+            <p class="cost"><strong>Plan KVM 2</strong> (2 CPU, 8 GB de RAM): aprox. US$9/mes con contrato de 2 años; sube al renovar.</p>
+          </div>
+        </li>
+        <li class="tool">
+          <div class="tool-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="7" y="2.5" width="10" height="19" rx="2.5"/><path d="M11 18.5h2"/></svg></div>
+          <div>
+            <div class="tool-head"><h3><a href="https://telegram.org" target="_blank" rel="noopener">Telegram</a></h3><span class="tag">La línea directa</span></div>
+            <p>Desde aquí le escribe al agente con su celular. Slack también funciona.</p>
+            <p class="cost"><strong>Gratis.</strong></p>
+          </div>
+        </li>
+        <li class="tool">
+          <div class="tool-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="1.5"/><path d="M4 12h16M10 7.5h4M10 16.5h4"/></svg></div>
+          <div>
+            <div class="tool-head"><h3><a href="https://github.com" target="_blank" rel="noopener">GitHub</a></h3><span class="tag">El archivo</span></div>
+            <p>Guarda el código de todo lo que el agente construye, con historial de cambios y respaldo. De aquí lo toma Vercel para publicarlo.</p>
+            <p class="cost"><strong>Gratis.</strong></p>
+          </div>
+        </li>
+        <li class="tool">
+          <div class="tool-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 9.5V20h16V9.5"/><path d="M3 9.5l1.5-5.5h15L21 9.5z"/><path d="M10 20v-5h4v5"/></svg></div>
+          <div>
+            <div class="tool-head"><h3><a href="https://vercel.com" target="_blank" rel="noopener">Vercel</a></h3><span class="tag">La vitrina</span></div>
+            <p>Publica en internet sus páginas web y apps. Cada cambio que llega a GitHub se publica solo.</p>
+            <p class="cost"><strong>Pro, US$20/usuario/mes.</strong> El plan gratuito no permite uso comercial.</p>
+          </div>
+        </li>
+        <li class="tool">
+          <div class="tool-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><ellipse cx="12" cy="5.5" rx="7.5" ry="2.75"/><path d="M4.5 5.5v13c0 1.5 3.4 2.75 7.5 2.75s7.5-1.25 7.5-2.75v-13"/><path d="M4.5 12c0 1.5 3.4 2.75 7.5 2.75s7.5-1.25 7.5-2.75"/></svg></div>
+          <div>
+            <div class="tool-head"><h3><a href="https://supabase.com" target="_blank" rel="noopener">Supabase</a></h3><span class="tag">Los registros</span></div>
+            <p>La base de datos de sus apps: usuarios, inicios de sesión y archivos.</p>
+            <p class="cost"><strong>Gratis para pruebas</strong> (se pausa tras una semana sin uso). Pro, US$25/mes para apps en uso real.</p>
+          </div>
+        </li>
+      </ul>
+    </div>
+  </section>
+
+  <section id="donde">
+    <div class="wrap">
+      <h2>Dónde vive el agente</h2>
+      <p>El agente solo trabaja mientras la computadora donde está instalado siga encendida y conectada a internet. Por eso recomendamos un servidor en Hostinger.</p>
+      <div class="compare">
+        <div class="option option--pick">
+          <span class="tag tag--pine">Recomendado</span>
+          <h3>Servidor en Hostinger</h3>
+          <ul>
+            <li class="yes"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><span>Encendido las 24 horas, aunque usted apague su computadora.</span></li>
+            <li class="yes"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><span>Si se reinicia, el agente vuelve a arrancar solo.</span></li>
+            <li class="yes"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><span>Separado de sus archivos personales y de la empresa.</span></li>
+          </ul>
+          <p class="price">Aprox. US$9/mes. Requiere una configuración inicial.</p>
+        </div>
+        <div class="option">
+          <span class="tag">Alternativa</span>
+          <h3>Su propia computadora</h3>
+          <ul>
+            <li class="yes"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><span>Sin costo adicional.</span></li>
+            <li class="no"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></svg><span>Tiene que quedar encendida y conectada siempre.</span></li>
+            <li class="no"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></svg><span>En Mac, si se reinicia, hay que arrancar el agente a mano.</span></li>
+            <li class="no"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></svg><span>El agente tiene acceso a todo lo que hay en ella.</span></li>
+          </ul>
+          <p class="price">Funciona en Mac y Linux. En Windows requiere WSL.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="instalacion">
+    <div class="wrap">
+      <h2>Instalación paso a paso</h2>
+      <p>Instalar Sentō es un solo comando. Lo demás es abrir las cuentas y preparar los accesos.</p>
+
+      <ol class="steps">
+        <li class="step">
+          <div>
+            <h3>Abra las cuentas</h3>
+            <p>Claude, GitHub, Vercel, Supabase, Hostinger y Telegram. Use el correo de su empresa.</p>
+          </div>
+        </li>
+        <li class="step">
+          <div>
+            <h3>Contrate el servidor</h3>
+            <p>En Hostinger, elija el plan <strong>KVM 2</strong> y, como sistema operativo, <strong>Ubuntu</strong>. Anote la dirección IP que le asignan.</p>
+          </div>
+        </li>
+        <li class="step">
+          <div>
+            <h3>Conéctese al servidor</h3>
+            <p>Desde la terminal del panel de Hostinger o desde su computadora:</p>
+            <div class="cmd"><code>ssh root@IP-DE-SU-SERVIDOR</code><button type="button" data-copy>Copiar</button></div>
+          </div>
+        </li>
+        <li class="step">
+          <div>
+            <h3>Instale Node.js</h3>
+            <p>Sentō necesita la versión 20 o superior.</p>
+            <div class="cmd"><code>curl -fsSL https://deb.nodesource.com/setup_22.x | bash - &amp;&amp; apt-get install -y nodejs</code><button type="button" data-copy>Copiar</button></div>
+          </div>
+        </li>
+        <li class="step">
+          <div>
+            <h3>Cree su bot de Telegram</h3>
+            <p>En Telegram, busque <strong>@BotFather</strong>, envíe <code class="inline">/newbot</code> y guarde el token que le entrega.</p>
+          </div>
+        </li>
+        <li class="step">
+          <div>
+            <h3>Obtenga su token de Claude</h3>
+            <p>En una computadora con Claude Code instalado y su sesión iniciada:</p>
+            <div class="cmd"><code>claude setup-token</code><button type="button" data-copy>Copiar</button></div>
+            <p class="muted">Guárdelo como una contraseña. Nunca lo comparta por chat ni correo.</p>
+          </div>
+        </li>
+        <li class="step">
+          <div>
+            <h3>Instale Sentō</h3>
+            <p>En el servidor:</p>
+            <div class="cmd"><code>npx sentoagent init</code><button type="button" data-copy>Copiar</button></div>
+            <p class="muted">El asistente le pide un nombre, una personalidad, el canal (Telegram), el token del bot y el token de Claude. Al terminar, ejecute <code class="inline">source ~/.bashrc</code>.</p>
+          </div>
+        </li>
+        <li class="step">
+          <div>
+            <h3>Salude a su agente</h3>
+            <p>Escríbale “hola” al bot en Telegram. El agente inicia una entrevista para conocerlo a usted y a su negocio.</p>
+          </div>
+        </li>
+        <li class="step">
+          <div>
+            <h3>Limite quién le da órdenes</h3>
+            <div class="cmd"><code>sento channels</code><button type="button" data-copy>Copiar</button></div>
+            <p class="muted">Deje autorizado solo su usuario. Si la lista queda vacía, cualquiera con acceso al canal puede darle instrucciones.</p>
+          </div>
+        </li>
+        <li class="step">
+          <div>
+            <h3>Conecte GitHub, Vercel y Supabase</h3>
+            <p>Cuando el agente vaya a publicar algo, le pedirá acceso. Cada servicio le da un token; créelo con los permisos mínimos necesarios.</p>
+          </div>
+        </li>
+      </ol>
+    </div>
+  </section>
+
+  <section id="comandos">
+    <div class="wrap">
+      <h2>Comandos útiles</h2>
+      <p>Para revisar o reiniciar el agente, conéctese al servidor y use estos comandos.</p>
+      <table>
+        <thead><tr><th scope="col">Comando</th><th scope="col">Qué hace</th></tr></thead>
+        <tbody>
+          <tr><td><code class="inline">sento status</code></td><td>Muestra si el agente está funcionando.</td></tr>
+          <tr><td><code class="inline">sento logs</code></td><td>Muestra lo último que hizo.</td></tr>
+          <tr><td><code class="inline">sento restart</code></td><td>Reinicia el agente.</td></tr>
+          <tr><td><code class="inline">sento config</code></td><td>Cambia el modelo, los tokens y los ajustes.</td></tr>
+          <tr><td><code class="inline">sento update</code></td><td>Actualiza todo. Úselo después de cada actualización de Claude Code.</td></tr>
+          <tr><td><code class="inline">sento doctor --fix</code></td><td>Detecta y corrige problemas.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="costo">
+    <div class="wrap">
+      <h2>Cuánto cuesta al mes</h2>
+      <p>El costo depende sobre todo del plan de Claude. Los precios son aproximados y pueden cambiar; confírmelos en el sitio de cada servicio.</p>
+      <div class="costs" role="table" aria-label="Costo mensual estimado por servicio">
+        <div class="cost-row" role="row">
+          <span class="cost-name" role="rowheader">Claude</span>
+          <div class="track" aria-hidden="true"><div class="bar bar--range" style="left:10%;width:90%"></div></div>
+          <span class="cost-amt" role="cell">US$20–200</span>
+        </div>
+        <div class="cost-row" role="row">
+          <span class="cost-name" role="rowheader">Supabase</span>
+          <div class="track" aria-hidden="true"><div class="bar bar--range" style="left:0;width:12.5%"></div></div>
+          <span class="cost-amt" role="cell">US$0–25</span>
+        </div>
+        <div class="cost-row" role="row">
+          <span class="cost-name" role="rowheader">Vercel</span>
+          <div class="track" aria-hidden="true"><div class="bar" style="left:0;width:10%"></div></div>
+          <span class="cost-amt" role="cell">US$20</span>
+        </div>
+        <div class="cost-row" role="row">
+          <span class="cost-name" role="rowheader">Hostinger</span>
+          <div class="track" aria-hidden="true"><div class="bar" style="left:0;width:4.5%"></div></div>
+          <span class="cost-amt" role="cell">aprox. US$9</span>
+        </div>
+        <div class="cost-row" role="row">
+          <span class="cost-name" role="rowheader">GitHub y Telegram</span>
+          <div class="track" aria-hidden="true"></div>
+          <span class="cost-amt" role="cell">Gratis</span>
+        </div>
+      </div>
+      <div class="legend" aria-hidden="true">
+        <span><i></i>Precio fijo</span>
+        <span><i class="r"></i>Rango según el plan</span>
+      </div>
+      <div class="cost-total">
+        <span>Total estimado</span>
+        <strong>US$50–255 al mes</strong>
+      </div>
+    </div>
+  </section>
+
+  <section id="antes">
+    <div class="wrap">
+      <h2>Antes de empezar</h2>
+      <p>Tres puntos que conviene conocer antes de poner el agente a trabajar con información real.</p>
+      <div class="notes">
+        <div class="note note--warn">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5L2.5 20h19L12 3.5z"/><path d="M12 10v4.5M12 17.2h.01"/></svg>
+          <div>
+            <h3>Su suscripción de Claude</h3>
+            <p>Sentō usa su plan Pro o Max en lugar de cobrar por uso. Anthropic diseña esos planes para el uso individual normal de Claude Code y puede restringir cuentas sin aviso. Para uso empresarial, lo más seguro es una API key de Anthropic con pago por uso; el sitio de Sentō indica que la acepta.</p>
+          </div>
+        </div>
+        <div class="note note--warn">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="10.5" width="14" height="10" rx="2"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/></svg>
+          <div>
+            <h3>Seguridad</h3>
+            <p>El agente tiene acceso total a la computadora donde corre y guarda las contraseñas en texto plano. Úselo solo en un servidor dedicado, nunca en una computadora con información bancaria, fiscal o de clientes.</p>
+          </div>
+        </div>
+        <div class="note note--info">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5.5M12 7.8h.01"/></svg>
+          <div>
+            <h3>Proyecto independiente</h3>
+            <p>Sentō no es de Anthropic. Es un proyecto de código abierto mantenido por una sola persona, así que puede cambiar o dejar de recibir soporte.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="checklist">
+    <div class="wrap">
+      <h2>Su checklist</h2>
+      <p>Marque cada punto a medida que avanza. Se guarda en este navegador.</p>
+      <div class="progress">
+        <div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div>
+        <span class="progress-label" id="progress-label" aria-live="polite">0 de 8 listos</span>
+      </div>
+      <ul class="checklist" id="checklist">
+        <li><label><input type="checkbox" data-key="claude"><span>Cuenta de Claude (Pro o Max) o API key de Anthropic</span></label></li>
+        <li><label><input type="checkbox" data-key="github"><span>Cuenta de GitHub</span></label></li>
+        <li><label><input type="checkbox" data-key="vercel"><span>Cuenta de Vercel (plan Pro para uso comercial)</span></label></li>
+        <li><label><input type="checkbox" data-key="supabase"><span>Cuenta de Supabase</span></label></li>
+        <li><label><input type="checkbox" data-key="hostinger"><span>Servidor en Hostinger (KVM 2, Ubuntu)</span></label></li>
+        <li><label><input type="checkbox" data-key="bot"><span>Bot de Telegram creado con @BotFather</span></label></li>
+        <li><label><input type="checkbox" data-key="sento"><span>Sentō instalado y respondiendo en Telegram</span></label></li>
+        <li><label><input type="checkbox" data-key="access"><span>Acceso al bot limitado a su usuario</span></label></li>
+      </ul>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <h2>Fuentes</h2>
+    <ul>
+      <li><a href="https://sentoagent.com/" target="_blank" rel="noopener">Sentō, sitio oficial</a></li>
+      <li><a href="https://socket.dev/npm/package/sentoagent" target="_blank" rel="noopener">Sentō, documentación del paquete</a></li>
+      <li><a href="https://modelence.com/compare/vercel-pricing" target="_blank" rel="noopener">Precios de Vercel 2026</a></li>
+      <li><a href="https://makerkit.dev/blog/md/saas/supabase-pricing" target="_blank" rel="noopener">Precios de Supabase 2026</a></li>
+      <li><a href="https://www.brandrums.com/blog/host-nodejs-app-hostinger-vps-2026/" target="_blank" rel="noopener">Planes VPS de Hostinger</a></li>
+      <li><a href="https://winbuzzer.com/2026/02/19/anthropic-bans-claude-subscription-oauth-in-third-party-apps-xcxwbn/" target="_blank" rel="noopener">Política de Anthropic sobre suscripciones</a></li>
+    </ul>
+    <p class="signoff">ProDezk Inc., Miami</p>
+    <p>Esta guía es informativa. Los precios y las condiciones de cada servicio pueden cambiar.</p>
+  </div>
+</footer>
+
+<script>
+  // Copy buttons
+  document.querySelectorAll('[data-copy]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var text = btn.parentElement.querySelector('code').textContent;
+      var done = function () {
+        btn.textContent = 'Copiado';
+        btn.classList.add('done');
+        setTimeout(function () { btn.textContent = 'Copiar'; btn.classList.remove('done'); }, 1800);
+      };
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(done, function () { fallback(text); done(); });
+      } else { fallback(text); done(); }
+    });
+  });
+  function fallback(text) {
+    var ta = document.createElement('textarea');
+    ta.value = text; ta.setAttribute('readonly', ''); ta.style.position = 'absolute'; ta.style.left = '-9999px';
+    document.body.appendChild(ta); ta.select();
+    try { document.execCommand('copy'); } catch (e) {}
+    document.body.removeChild(ta);
+  }
+
+  // Checklist with saved progress
+  (function () {
+    var KEY = 'prodezk-guia-agentes-ia';
+    var boxes = Array.prototype.slice.call(document.querySelectorAll('#checklist input'));
+    var fill = document.getElementById('progress-fill');
+    var label = document.getElementById('progress-label');
+    var saved = {};
+    try { saved = JSON.parse(localStorage.getItem(KEY) || '{}'); } catch (e) { saved = {}; }
+    function update() {
+      var n = boxes.filter(function (b) { return b.checked; }).length;
+      fill.style.width = (n / boxes.length * 100) + '%';
+      label.textContent = n === boxes.length ? 'Todo listo' : n + ' de ' + boxes.length + ' listos';
+    }
+    boxes.forEach(function (b) {
+      b.checked = !!saved[b.dataset.key];
+      b.addEventListener('change', function () {
+        saved[b.dataset.key] = b.checked;
+        try { localStorage.setItem(KEY, JSON.stringify(saved)); } catch (e) {}
+        update();
+      });
+    });
+    update();
+  })();
+</script>
+</body>
+</html>
